@@ -134,7 +134,7 @@ def main():
     config.set('DEFAULT', 'jsbdir', jsb_root)
     config.set('DEFAULT', 'cxxgeneratordir', cxx_generator_root)
     config.set('DEFAULT', 'extra_flags', '')
-    
+
     if '3.' in llvm_path:
         if '3.6' in llvm_path:
             config.set('DEFAULT', 'clang_include', 'lib/clang/3.6/include')
@@ -183,6 +183,7 @@ def main():
                     'box2d.ini' : ('box2d', 'jsb_box2d_auto'),
                     'anysdk-common.ini': ('protocols', 'jsb_anysdk_protocols_auto'),
                     'anysdk-appstore.ini': ('protocols', 'jsb_anysdk_protocols_auto'),
+                    'goldenlemon.ini': ('goldenlemon', 'jsb_goldenlemon_auto'),
                     }
         target = 'spidermonkey'
         generator_py = '%s/generator.py' % cxx_generator_root
