@@ -23,9 +23,10 @@ import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.media.MediaPlayer.OnErrorListener;
+//import android.media.MediaPlayer;
+//import android.media.MediaPlayer.OnErrorListener;
 import android.net.Uri;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -36,6 +37,12 @@ import android.widget.MediaController.MediaPlayerControl;
 
 import java.io.IOException;
 import java.util.Map;
+
+// 百度播放器
+import com.baidu.cloud.media.player.BDCloudMediaPlayer;
+import com.baidu.cloud.media.player.BDTimedText;
+import com.baidu.cloud.media.player.IMediaPlayer;
+import java.io.File;
 
 public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl {
     private String TAG = "Cocos2dxVideoView";
@@ -64,14 +71,17 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
 
     // All the stuff we need for playing and showing a video
     private SurfaceHolder mSurfaceHolder = null;
-    private MediaPlayer mMediaPlayer = null;
+//    private MediaPlayer mMediaPlayer = null;
+    private BDCloudMediaPlayer mMediaPlayer = null;
     private int         mVideoWidth = 0;
     private int         mVideoHeight = 0;
 
     private OnVideoEventListener mOnVideoEventListener;
-    private MediaPlayer.OnPreparedListener mOnPreparedListener;
+//    private MediaPlayer.OnPreparedListener mOnPreparedListener;
+    private IMediaPlayer.OnPreparedListener mOnPreparedListener;
     private int         mCurrentBufferPercentage;
-    private OnErrorListener mOnErrorListener;
+//    private OnErrorListener mOnErrorListener;
+    private IMediaPlayer.OnErrorListener mOnErrorListener;
 
     // recording the seek position while preparing
     private int         mSeekWhenPrepared = 0;
@@ -99,6 +109,7 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
 
         mViewTag = tag;
         mCocos2dxActivity = activity;
+
         initVideoView();
     }
 
@@ -183,11 +194,14 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
         mVideoHeight = 0;
         getHolder().addCallback(mSHCallback);
         //Fix issue#11516:Can't play video on Android 2.3.x
-        getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+//        getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         setFocusable(true);
         setFocusableInTouchMode(true);
         mCurrentState = STATE_IDLE;
         mTargetState  = STATE_IDLE;
+
+//        BDCloudMediaPlayer.setAK("7da96283643247a082b632f525048a80");
+
     }
 
     @Override
@@ -271,27 +285,50 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
 
         try {
             //if (mMediaPlayer == null) {
-                mMediaPlayer = new MediaPlayer();
-                mMediaPlayer.setOnPreparedListener(mPreparedListener);
-                mMediaPlayer.setOnVideoSizeChangedListener(mSizeChangedListener);
-                mMediaPlayer.setOnCompletionListener(mCompletionListener);
-                mMediaPlayer.setOnErrorListener(mErrorListener);
-                mMediaPlayer.setOnBufferingUpdateListener(mBufferingUpdateListener);
+//                mMediaPlayer = new MediaPlayer();
+//                mMediaPlayer.setOnPreparedListener(mPreparedListener);
+//                mMediaPlayer.setOnVideoSizeChangedListener(mSizeChangedListener);
+//                mMediaPlayer.setOnCompletionListener(mCompletionListener);
+//                mMediaPlayer.setOnErrorListener(mErrorListener);
+//                mMediaPlayer.setOnBufferingUpdateListener(mBufferingUpdateListener);
+//
+//
+//                mMediaPlayer.setDisplay(mSurfaceHolder);
+//                mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+//                mMediaPlayer.setScreenOnWhilePlaying(true);
+
+            mMediaPlayer = new BDCloudMediaPlayer(this.mCocos2dxActivity.getApplicationContext());
+
+//            mMediaPlayer.setLogEnabled(true); // 打开播放器日志输出
+//            mMediaPlayer.setMaxProbeTime(4);
+
+            mMediaPlayer.setOnPreparedListener(mPreparedListener);
+            mMediaPlayer.setOnVideoSizeChangedListener(mSizeChangedListener);
+            mMediaPlayer.setOnCompletionListener(mCompletionListener);
+            mMediaPlayer.setOnErrorListener(mErrorListener);
+            mMediaPlayer.setOnBufferingUpdateListener(mBufferingUpdateListener);
+            mMediaPlayer.setOnMetadataListener(mMetadataListener);
 
 
-                mMediaPlayer.setDisplay(mSurfaceHolder);
-                mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                mMediaPlayer.setScreenOnWhilePlaying(true);
-            //}
+            mMediaPlayer.setDisplay(mSurfaceHolder);
+//            mSurfaceHolder.bindToMediaPlayer(mMediaPlayer);
+
+//            //}
 
             mDuration = -1;
             mCurrentBufferPercentage = 0;
             if (mIsAssetRouse) {
                 AssetFileDescriptor afd = mCocos2dxActivity.getAssets().openFd(mVideoFilePath);
-                mMediaPlayer.setDataSource(afd.getFileDescriptor(),afd.getStartOffset(),afd.getLength());
+//                mMediaPlayer.setDataSource(afd.getFileDescriptor(),afd.getStartOffset(),afd.getLength());
+                mVideoUri = Uri.fromFile(new File(mVideoFilePath));
+                mMediaPlayer.setDataSource(mCocos2dxActivity, mVideoUri);
             } else {
                 mMediaPlayer.setDataSource(mCocos2dxActivity, mVideoUri);
             }
+
+            mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            mMediaPlayer.setScreenOnWhilePlaying(true);
+            mMediaPlayer.setTimeoutInUs(15000000);
 
             mMediaPlayer.prepareAsync();
 
@@ -303,13 +340,15 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
             Log.w(TAG, "Unable to open content: " + mVideoUri, ex);
             mCurrentState = STATE_ERROR;
             mTargetState = STATE_ERROR;
-            mErrorListener.onError(mMediaPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
+//            mErrorListener.onError(mMediaPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
+            mErrorListener.onError(mMediaPlayer, IMediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
             return;
         } catch (IllegalArgumentException ex) {
             Log.w(TAG, "Unable to open content: " + mVideoUri, ex);
             mCurrentState = STATE_ERROR;
             mTargetState = STATE_ERROR;
-            mErrorListener.onError(mMediaPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
+//            mErrorListener.onError(mMediaPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
+            mErrorListener.onError(mMediaPlayer, IMediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
             return;
         }
     }
@@ -372,20 +411,26 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
     }
 
     protected
-    MediaPlayer.OnVideoSizeChangedListener mSizeChangedListener =
-        new MediaPlayer.OnVideoSizeChangedListener() {
-            public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
+//    MediaPlayer.OnVideoSizeChangedListener mSizeChangedListener =
+//        new MediaPlayer.OnVideoSizeChangedListener() {
+//            public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
+    IMediaPlayer.OnVideoSizeChangedListener mSizeChangedListener =
+        new IMediaPlayer.OnVideoSizeChangedListener() {
+            public void onVideoSizeChanged(IMediaPlayer mp, int width, int height, int sarNum, int sarDen) {
+
                 mVideoWidth = mp.getVideoWidth();
                 mVideoHeight = mp.getVideoHeight();
                 if (mVideoWidth != 0 && mVideoHeight != 0) {
                     getHolder().setFixedSize(mVideoWidth, mVideoHeight);
                 }
             }
-    };
+        };
 
 
-    MediaPlayer.OnPreparedListener mPreparedListener = new MediaPlayer.OnPreparedListener() {
-        public void onPrepared(MediaPlayer mp) {
+//    MediaPlayer.OnPreparedListener mPreparedListener = new MediaPlayer.OnPreparedListener() {
+//        public void onPrepared(MediaPlayer mp) {
+IMediaPlayer.OnPreparedListener mPreparedListener = new IMediaPlayer.OnPreparedListener() {
+    public void onPrepared(IMediaPlayer mp) {
             mCurrentState = STATE_PREPARED;
 
             if (mOnPreparedListener != null) {
@@ -396,8 +441,8 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
             mVideoHeight = mp.getVideoHeight();
 
             // mSeekWhenPrepared may be changed after seekTo() call
-            int seekToPosition = mSeekWhenPrepared;
-            seekTo(seekToPosition);
+//            int seekToPosition = mSeekWhenPrepared;
+//            seekTo(seekToPosition);
 
 
             if (mVideoWidth != 0 && mVideoHeight != 0) {
@@ -416,14 +461,23 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
         }
     };
 
-    private MediaPlayer.OnCompletionListener mCompletionListener =
-        new MediaPlayer.OnCompletionListener() {
-        public void onCompletion(MediaPlayer mp) {
-            mCurrentState = STATE_PLAYBACK_COMPLETED;
-            mTargetState = STATE_PLAYBACK_COMPLETED;
+    private IMediaPlayer.OnCompletionListener mCompletionListener =
+            new IMediaPlayer.OnCompletionListener() {
+                public void onCompletion(IMediaPlayer mp) {
+                    mCurrentState = STATE_PLAYBACK_COMPLETED;
+                    mTargetState = STATE_PLAYBACK_COMPLETED;
 
-            if (mOnVideoEventListener != null) {
-                mOnVideoEventListener.onVideoEvent(mViewTag,EVENT_COMPLETED);
+                    if (mOnVideoEventListener != null) {
+                        mOnVideoEventListener.onVideoEvent(mViewTag,EVENT_COMPLETED);
+                    }
+                }
+            };
+
+    private IMediaPlayer.OnMetadataListener mMetadataListener = new IMediaPlayer.OnMetadataListener() {
+        @Override
+        public void onMetadata(IMediaPlayer mp, Bundle meta) {
+            for (String key : meta.keySet()) {
+                Log.d(TAG, "onMetadata: key = " + key + ", value = " + meta.getString(key));
             }
         }
     };
@@ -442,9 +496,9 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
         void onVideoEvent(int tag,int event);
     }
 
-    private MediaPlayer.OnErrorListener mErrorListener =
-        new MediaPlayer.OnErrorListener() {
-        public boolean onError(MediaPlayer mp, int framework_err, int impl_err) {
+    private IMediaPlayer.OnErrorListener mErrorListener =
+            new IMediaPlayer.OnErrorListener() {
+                public boolean onError(IMediaPlayer mp, int framework_err, int impl_err) {
             Log.d(TAG, "Error: " + framework_err + "," + impl_err);
             mCurrentState = STATE_ERROR;
             mTargetState = STATE_ERROR;
@@ -465,7 +519,8 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
                 Resources r = mCocos2dxActivity.getResources();
                 int messageId;
 
-                if (framework_err == MediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK) {
+//                if (framework_err == MediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK) {
+                if (framework_err == IMediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK) {
                     // messageId = com.android.internal.R.string.VideoView_error_text_invalid_progressive_playback;
                     messageId = r.getIdentifier("VideoView_error_text_invalid_progressive_playback", "string", "android");
                 } else {
@@ -497,10 +552,13 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
         }
     };
 
-    private MediaPlayer.OnBufferingUpdateListener mBufferingUpdateListener =
-        new MediaPlayer.OnBufferingUpdateListener() {
-        public void onBufferingUpdate(MediaPlayer mp, int percent) {
-            mCurrentBufferPercentage = percent;
+//    private MediaPlayer.OnBufferingUpdateListener mBufferingUpdateListener =
+//        new MediaPlayer.OnBufferingUpdateListener() {
+//        public void onBufferingUpdate(MediaPlayer mp, int percent) {
+    private IMediaPlayer.OnBufferingUpdateListener mBufferingUpdateListener =
+        new IMediaPlayer.OnBufferingUpdateListener() {
+            public void onBufferingUpdate(IMediaPlayer mp, int percent) {
+                mCurrentBufferPercentage = percent;
         }
     };
 
@@ -510,7 +568,7 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
      *
      * @param l The callback that will be run
      */
-    public void setOnPreparedListener(MediaPlayer.OnPreparedListener l)
+    public void setOnPreparedListener(IMediaPlayer.OnPreparedListener l)
     {
         mOnPreparedListener = l;
     }
@@ -534,7 +592,7 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
      *
      * @param l The callback that will be run
      */
-    public void setOnErrorListener(OnErrorListener l)
+    public void setOnErrorListener(IMediaPlayer.OnErrorListener l)
     {
         mOnErrorListener = l;
     }
@@ -655,7 +713,7 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
             if (mDuration > 0) {
                 return mDuration;
             }
-            mDuration = mMediaPlayer.getDuration();
+            mDuration = (int)mMediaPlayer.getDuration();
             return mDuration;
         }
         mDuration = -1;
@@ -664,13 +722,14 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
 
     public int getCurrentPosition() {
         if (isInPlaybackState()) {
-            return mMediaPlayer.getCurrentPosition();
+            return (int)mMediaPlayer.getCurrentPosition();
         } else {
             return mSeekWhenPrepared;
         }
     }
 
     public void seekTo(int msec) {
+        Log.w(TAG,"seek to :"+msec);
         if (isInPlaybackState()) {
             mMediaPlayer.seekTo(msec);
             mSeekWhenPrepared = 0;

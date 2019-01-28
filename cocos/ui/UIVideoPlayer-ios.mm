@@ -35,9 +35,13 @@ using namespace cocos2d::experimental::ui;
 #include "base/CCDirector.h"
 #include "platform/CCFileUtils.h"
 
+#import <BDCloudMediaPlayer/BDCloudMediaPlayer.h>
+
 @interface UIVideoViewWrapperIos : NSObject<UIGestureRecognizerDelegate>
 
-@property (strong,nonatomic) MPMoviePlayerController * moviePlayer;
+//@property (strong,nonatomic) MPMoviePlayerController * moviePlayer;
+@property (strong,nonatomic) BDCloudMediaPlayerController * mediaPlayer;
+
 
 - (void) setFrame:(int) left :(int) top :(int) width :(int) height;
 - (void) setURL:(int) videoSource :(std::string&) videoUrl;
@@ -76,7 +80,8 @@ using namespace cocos2d::experimental::ui;
 -(id)init:(void*)videoPlayer
 {
     if (self = [super init]) {
-        self.moviePlayer = nullptr;
+//        self.moviePlayer = nullptr;
+        self.mediaPlayer = nullptr;
         _videoPlayer = (VideoPlayer*)videoPlayer;
         _keepRatioEnabled = false;
     }
@@ -86,30 +91,53 @@ using namespace cocos2d::experimental::ui;
 
 -(void) cleanup
 {
-    if (self.moviePlayer != nullptr) {
+//    if (self.moviePlayer != nullptr) {
+//        [self removeRegisteredObservers];
+//
+//        [self.moviePlayer stop];
+//        [self.moviePlayer.view removeFromSuperview];
+//        self.moviePlayer = nullptr;
+//    }
+    if (self.mediaPlayer != nullptr) {
         [self removeRegisteredObservers];
-
-        [self.moviePlayer stop];
-        [self.moviePlayer.view removeFromSuperview];
-        self.moviePlayer = nullptr;
+        
+        [self.mediaPlayer stop];
+        [self.mediaPlayer.view removeFromSuperview];
+        self.mediaPlayer = nullptr;
     }
 }
 
 -(void) removeRegisteredObservers {
+//    [[NSNotificationCenter defaultCenter] removeObserver:self
+//                                                    name:MPMoviePlayerPlaybackDidFinishNotification
+//                                                  object:self.moviePlayer];
+//    [[NSNotificationCenter defaultCenter] removeObserver:self
+//                                                    name:MPMoviePlayerPlaybackStateDidChangeNotification
+//                                                  object:self.moviePlayer];
+//
+//    [[NSNotificationCenter defaultCenter] removeObserver:self
+//                                                    name:MPMovieDurationAvailableNotification
+//                                                  object:nil];
+//
+//    [[NSNotificationCenter defaultCenter] removeObserver:self
+//                                                    name:MPMoviePlayerLoadStateDidChangeNotification
+//                                                  object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self
-                                                    name:MPMoviePlayerPlaybackDidFinishNotification
-                                                  object:self.moviePlayer];
-    [[NSNotificationCenter defaultCenter] removeObserver:self
-                                                    name:MPMoviePlayerPlaybackStateDidChangeNotification
-                                                  object:self.moviePlayer];
+                                                 name:BDCloudMediaPlayerPlaybackDidFinishNotification
+                                               object:self.mediaPlayer];
     
     [[NSNotificationCenter defaultCenter] removeObserver:self
-                                                    name:MPMovieDurationAvailableNotification
-                                                  object:nil];
+                                                 name:BDCloudMediaPlayerPlaybackStateDidChangeNotification
+                                               object:self.mediaPlayer];
     
     [[NSNotificationCenter defaultCenter] removeObserver:self
-                                                    name:MPMoviePlayerLoadStateDidChangeNotification
-                                                  object:nil];
+                                                 name:BDCloudMediaPlayerMetadataNotification
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                 name:BDCloudMediaPlayerLoadStateDidChangeNotification
+                                               object:nil];
+
 }
 
 -(void) dealloc
@@ -125,30 +153,43 @@ using namespace cocos2d::experimental::ui;
     _width = width;
     _top = top;
     _height = height;
-    if (self.moviePlayer != nullptr) {
-        [self.moviePlayer.view setFrame:CGRectMake(left, top, width, height)];
+//    if (self.moviePlayer != nullptr) {
+//        [self.moviePlayer.view setFrame:CGRectMake(left, top, width, height)];
+//    }
+    if (self.mediaPlayer != nullptr) {
+        [self.mediaPlayer.view setFrame:CGRectMake(left, top, width, height)];
     }
 }
 
 -(void) setFullScreenEnabled:(BOOL) enabled
 {
-    if (self.moviePlayer != nullptr) {
-        [self.moviePlayer setFullscreen:enabled animated:NO];
-    }
+//    if (self.moviePlayer != nullptr) {
+//        [self.moviePlayer setFullscreen:enabled animated:NO];
+//    }
+//    if (self.mediaPlayer != nullptr) {
+//        [self.mediaPlayer setFullscreen:enabled animated:NO];
+//    }
 }
 
 -(BOOL) isFullScreenEnabled
 {
-    if (self.moviePlayer != nullptr) {
-        return [self.moviePlayer isFullscreen];
-    }
+//    if (self.moviePlayer != nullptr) {
+//        return [self.moviePlayer isFullscreen];
+//    }
+//    if (self.mediaPlayer != nullptr) {
+//        return [self.mediaPlayer isFullscreen];
+//    }
 
     return false;
 }
 
 -(BOOL) isPlaying
 {
-    if(self.moviePlayer.playbackState == MPMoviePlaybackStatePlaying)
+//    if(self.moviePlayer.playbackState == MPMoviePlaybackStatePlaying)
+//        return YES;
+//    else
+//        return NO;
+    if(self.mediaPlayer.playbackState == BDCloudMediaPlayerPlaybackStatePlaying)
         return YES;
     else
         return NO;
@@ -159,52 +200,87 @@ using namespace cocos2d::experimental::ui;
     [self cleanup];
 
     if (videoSource == 1) {
-        self.moviePlayer = [[[MPMoviePlayerController alloc] init] autorelease];
-        self.moviePlayer.movieSourceType = MPMovieSourceTypeStreaming;
-        [self.moviePlayer setContentURL:[NSURL URLWithString:@(videoUrl.c_str())]];
+//        self.moviePlayer = [[[MPMoviePlayerController alloc] init] autorelease];
+//        self.moviePlayer.movieSourceType = MPMovieSourceTypeStreaming;
+//        [self.moviePlayer setContentURL:[NSURL URLWithString:@(videoUrl.c_str())]];
+        self.mediaPlayer = [[[BDCloudMediaPlayerController alloc] initWithContentString:[NSString stringWithString:@(videoUrl.c_str())]] autorelease];
+//        [self.mediaPlayer setContentURL:[NSURL URLWithString:@(videoUrl.c_str())]];
     } else {
-        self.moviePlayer = [[[MPMoviePlayerController alloc] initWithContentURL:[NSURL fileURLWithPath:@(videoUrl.c_str())]] autorelease];
-        self.moviePlayer.movieSourceType = MPMovieSourceTypeFile;
+//        self.moviePlayer = [[[MPMoviePlayerController alloc] initWithContentURL:[NSURL fileURLWithPath:@(videoUrl.c_str())]] autorelease];
+//        self.moviePlayer.movieSourceType = MPMovieSourceTypeFile;
+        self.mediaPlayer = [[[BDCloudMediaPlayerController alloc] initWithContentString:[NSString stringWithString:@(videoUrl.c_str())]] autorelease];
     }
-    self.moviePlayer.allowsAirPlay = NO;
-    self.moviePlayer.controlStyle = MPMovieControlStyleNone;
-    self.moviePlayer.view.userInteractionEnabled = YES;
+//    self.moviePlayer.allowsAirPlay = NO;
+//    self.moviePlayer.controlStyle = MPMovieControlStyleNone;
+//    self.moviePlayer.view.userInteractionEnabled = YES;
+    self.mediaPlayer.view.userInteractionEnabled = YES;
 
+//    auto clearColor = [UIColor clearColor];
+//    self.moviePlayer.backgroundView.backgroundColor = clearColor;
+//    self.moviePlayer.view.backgroundColor = clearColor;
+//    for (UIView * subView in self.moviePlayer.view.subviews) {
+//        subView.backgroundColor = clearColor;
+//    }
     auto clearColor = [UIColor clearColor];
-    self.moviePlayer.backgroundView.backgroundColor = clearColor;
-    self.moviePlayer.view.backgroundColor = clearColor;
-    for (UIView * subView in self.moviePlayer.view.subviews) {
+//    self.mediaPlayer.backgroundView.backgroundColor = clearColor;
+    self.mediaPlayer.view.backgroundColor = clearColor;
+    for (UIView * subView in self.mediaPlayer.view.subviews) {
         subView.backgroundColor = clearColor;
     }
 
+//    if (_keepRatioEnabled) {
+//        self.moviePlayer.scalingMode = MPMovieScalingModeAspectFit;
+//    } else {
+//        self.moviePlayer.scalingMode = MPMovieScalingModeFill;
+//    }
     if (_keepRatioEnabled) {
-        self.moviePlayer.scalingMode = MPMovieScalingModeAspectFit;
+        self.mediaPlayer.scalingMode = BDCloudMediaPlayerScalingModeAspectFit;
     } else {
-        self.moviePlayer.scalingMode = MPMovieScalingModeFill;
+        self.mediaPlayer.scalingMode = BDCloudMediaPlayerScalingModeFill;
     }
 
     auto view = cocos2d::Director::getInstance()->getOpenGLView();
     auto eaglview = (CCEAGLView *) view->getEAGLView();
-    [eaglview addSubview:self.moviePlayer.view];
+//    [eaglview addSubview:self.moviePlayer.view];
+    [eaglview addSubview:self.mediaPlayer.view];
 
 
+//    [[NSNotificationCenter defaultCenter] addObserver:self
+//                                             selector:@selector(videoFinished:)
+//                                                 name:MPMoviePlayerPlaybackDidFinishNotification
+//                                               object:self.moviePlayer];
+//    [[NSNotificationCenter defaultCenter] addObserver:self
+//                                             selector:@selector(playStateChange)
+//                                                 name:MPMoviePlayerPlaybackStateDidChangeNotification
+//                                               object:self.moviePlayer];
+//
+//    [[NSNotificationCenter defaultCenter] addObserver:self
+//                                             selector:@selector(metadataUpdate:)
+//                                                 name:MPMovieDurationAvailableNotification
+//                                               object:nil];
+//
+//    [[NSNotificationCenter defaultCenter] addObserver:self
+//                                             selector:@selector(loadStateUpdate:)
+//                                                 name:MPMoviePlayerLoadStateDidChangeNotification
+//                                               object:nil];
+    
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(videoFinished:)
-                                                 name:MPMoviePlayerPlaybackDidFinishNotification
-                                               object:self.moviePlayer];
+                                                 name:BDCloudMediaPlayerPlaybackDidFinishNotification
+                                               object:self.mediaPlayer];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(playStateChange)
-                                                 name:MPMoviePlayerPlaybackStateDidChangeNotification
-                                               object:self.moviePlayer];
-
+                                                 name:BDCloudMediaPlayerPlaybackStateDidChangeNotification
+                                               object:self.mediaPlayer];
+    
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(metadataUpdate:)
-                                                 name:MPMovieDurationAvailableNotification
+                                                 name:BDCloudMediaPlayerMetadataNotification
                                                object:nil];
-
+    
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(loadStateUpdate:)
-                                                 name:MPMoviePlayerLoadStateDidChangeNotification
+                                                 name:BDCloudMediaPlayerLoadStateDidChangeNotification
                                                object:nil];
 
 
@@ -213,8 +289,13 @@ using namespace cocos2d::experimental::ui;
     [[UITapGestureRecognizer alloc] initWithTarget:self
                                             action:@selector(handleSingleTap:)];
 
-    [self.moviePlayer.view addGestureRecognizer:singleFingerTap];
-
+//    [self.moviePlayer.view addGestureRecognizer:singleFingerTap];
+    [self.mediaPlayer.view addGestureRecognizer:singleFingerTap];
+    
+//    [self.moviePlayer prepareToPlay];
+    self.mediaPlayer.shouldAutoplay = YES;
+    [self.mediaPlayer prepareToPlay];
+    
     singleFingerTap.delegate = self;
     [singleFingerTap release];
 
@@ -237,9 +318,16 @@ using namespace cocos2d::experimental::ui;
 
 -(void) videoFinished:(NSNotification *)notification
 {
+//    if(_videoPlayer != nullptr)
+//    {
+//        if([self.moviePlayer playbackState] != MPMoviePlaybackStateStopped)
+//        {
+//            _videoPlayer->onPlayEvent((int)VideoPlayer::EventType::COMPLETED);
+//        }
+//    }
     if(_videoPlayer != nullptr)
     {
-        if([self.moviePlayer playbackState] != MPMoviePlaybackStateStopped)
+        if([self.mediaPlayer playbackState] != BDCloudMediaPlayerPlaybackStateStopped)
         {
             _videoPlayer->onPlayEvent((int)VideoPlayer::EventType::COMPLETED);
         }
@@ -248,9 +336,17 @@ using namespace cocos2d::experimental::ui;
 
 -(void) playStateChange
 {
-    MPMoviePlaybackState state = [self.moviePlayer playbackState];
+//    MPMoviePlaybackState state = [self.moviePlayer playbackState];
+//    switch (state) {
+//        case MPMoviePlaybackStatePlaying:
+//            _videoPlayer->onPlayEvent((int)VideoPlayer::EventType::PLAYING);
+//            break;
+//        default:
+//            break;
+//    }
+    BDCloudMediaPlayerPlaybackState state = [self.mediaPlayer playbackState];
     switch (state) {
-        case MPMoviePlaybackStatePlaying:
+        case BDCloudMediaPlayerPlaybackStatePlaying:
             _videoPlayer->onPlayEvent((int)VideoPlayer::EventType::PLAYING);
             break;
         default:
@@ -260,9 +356,14 @@ using namespace cocos2d::experimental::ui;
 
 -(void) loadStateUpdate:(NSNotification*)notification
 {
-    MPMovieLoadState state = [self.moviePlayer loadState];
-    if(state == MPMovieLoadStatePlayable ||
-       state == MPMovieLoadStatePlaythroughOK) {
+//    MPMovieLoadState state = [self.moviePlayer loadState];
+//    if(state == MPMovieLoadStatePlayable ||
+//       state == MPMovieLoadStatePlaythroughOK) {
+//        _videoPlayer->onPlayEvent((int)VideoPlayer::EventType::READY_TO_PLAY);
+//    }
+    BDCloudMediaPlayerLoadState state = [self.mediaPlayer loadState];
+    if(state == BDCloudMediaPlayerLoadStatePlayable ||
+       state == BDCloudMediaPlayerLoadStatePlaythroughOK) {
         _videoPlayer->onPlayEvent((int)VideoPlayer::EventType::READY_TO_PLAY);
     }
 }
@@ -274,15 +375,21 @@ using namespace cocos2d::experimental::ui;
 
 -(void) seekTo:(float)sec
 {
-    if (self.moviePlayer != NULL) {
-        [self.moviePlayer setCurrentPlaybackTime:(sec)];
+//    if (self.moviePlayer != NULL) {
+//        [self.moviePlayer setCurrentPlaybackTime:(sec)];
+//    }
+    if (self.mediaPlayer != NULL) {
+        [self.mediaPlayer setCurrentPlaybackTime:(sec)];
     }
 }
 
 -(float) currentTime
 {
-    if (self.moviePlayer != NULL) {
-        return [self.moviePlayer currentPlaybackTime];
+//    if (self.moviePlayer != NULL) {
+//        return [self.moviePlayer currentPlaybackTime];
+//    }
+    if (self.mediaPlayer != NULL) {
+        return [self.mediaPlayer currentPlaybackTime];
     }
     return -1;
 }
@@ -290,8 +397,14 @@ using namespace cocos2d::experimental::ui;
 -(float) duration
 {
     float duration = -1;
-    if (self.moviePlayer != NULL) {
-        duration = [self.moviePlayer duration];
+//    if (self.moviePlayer != NULL) {
+//        duration = [self.moviePlayer duration];
+//        if(duration <= 0) {
+//            CCLOG("Video player's duration is not ready to get now!");
+//        }
+//    }
+    if (self.mediaPlayer != NULL) {
+        duration = [self.mediaPlayer duration];
         if(duration <= 0) {
             CCLOG("Video player's duration is not ready to get now!");
         }
@@ -301,8 +414,14 @@ using namespace cocos2d::experimental::ui;
 
 -(void) setVisible:(BOOL)visible
 {
-    if (self.moviePlayer != NULL) {
-        [self.moviePlayer.view setHidden:!visible];
+//    if (self.moviePlayer != NULL) {
+//        [self.moviePlayer.view setHidden:!visible];
+//        if (!visible) {
+//            [self pause];
+//        }
+//    }
+    if (self.mediaPlayer != NULL) {
+        [self.mediaPlayer.view setHidden:!visible];
         if (!visible) {
             [self pause];
         }
@@ -312,48 +431,80 @@ using namespace cocos2d::experimental::ui;
 -(void) setKeepRatioEnabled:(BOOL)enabled
 {
     _keepRatioEnabled = enabled;
-    if (self.moviePlayer != NULL) {
+//    if (self.moviePlayer != NULL) {
+//        if (enabled) {
+//            self.moviePlayer.scalingMode = MPMovieScalingModeAspectFit;
+//        } else {
+//            self.moviePlayer.scalingMode = MPMovieScalingModeFill;
+//        }
+//    }
+    if (self.mediaPlayer != NULL) {
         if (enabled) {
-            self.moviePlayer.scalingMode = MPMovieScalingModeAspectFit;
+            self.mediaPlayer.scalingMode = BDCloudMediaPlayerScalingModeAspectFit;
         } else {
-            self.moviePlayer.scalingMode = MPMovieScalingModeFill;
+            self.mediaPlayer.scalingMode = BDCloudMediaPlayerScalingModeFill;
         }
     }
 }
 
 -(void) play
 {
-    if (self.moviePlayer != NULL) {
-        [self.moviePlayer.view setFrame:CGRectMake(_left, _top, _width, _height)];
-        [self.moviePlayer play];
+//    if (self.moviePlayer != NULL) {
+//        [self.moviePlayer.view setFrame:CGRectMake(_left, _top, _width, _height)];
+//        [self.moviePlayer play];
+//    }
+    if (self.mediaPlayer != NULL) {
+        [self.mediaPlayer.view setFrame:CGRectMake(_left, _top, _width, _height)];
+        [self.mediaPlayer play];
     }
 }
 
 -(void) pause
 {
-    if (self.moviePlayer != NULL) {
-        if([self.moviePlayer playbackState] == MPMoviePlaybackStatePlaying) {
+//    if (self.moviePlayer != NULL) {
+//        if([self.moviePlayer playbackState] == MPMoviePlaybackStatePlaying) {
+//            _videoPlayer->onPlayEvent((int)VideoPlayer::EventType::PAUSED);
+//        }
+//
+//        [self.moviePlayer pause];
+//    }
+    
+    if (self.mediaPlayer != NULL) {
+        if([self.mediaPlayer playbackState] == BDCloudMediaPlayerPlaybackStatePlaying) {
             _videoPlayer->onPlayEvent((int)VideoPlayer::EventType::PAUSED);
         }
-
-        [self.moviePlayer pause];
+        
+        [self.mediaPlayer pause];
     }
+    
+    
 }
 
 -(void) resume
 {
-    if (self.moviePlayer != NULL) {
-        if([self.moviePlayer playbackState] == MPMoviePlaybackStatePaused)
+//    if (self.moviePlayer != NULL) {
+//        if([self.moviePlayer playbackState] == MPMoviePlaybackStatePaused)
+//        {
+//            [self.moviePlayer play];
+//        }
+//    }
+    if (self.mediaPlayer != NULL) {
+        if([self.mediaPlayer playbackState] == BDCloudMediaPlayerPlaybackStatePaused)
         {
-            [self.moviePlayer play];
+            [self.mediaPlayer play];
         }
     }
 }
 
 -(void) stop
 {
-    if (self.moviePlayer != NULL) {
-        [self.moviePlayer pause];
+//    if (self.moviePlayer != NULL) {
+//        [self.moviePlayer pause];
+//        [self seekTo:0];
+//        _videoPlayer->onPlayEvent((int)VideoPlayer::EventType::STOPPED);
+//    }
+    if (self.mediaPlayer != NULL) {
+        [self.mediaPlayer pause];
         [self seekTo:0];
         _videoPlayer->onPlayEvent((int)VideoPlayer::EventType::STOPPED);
     }
@@ -369,6 +520,8 @@ VideoPlayer::VideoPlayer()
 , _fullScreenDirty(false)
 , _keepAspectRatioEnabled(false)
 {
+    [[BDCloudMediaPlayerAuth sharedInstance] setAccessKey:@"7da96283643247a082b632f525048a80"];
+    
     _videoView = [[UIVideoViewWrapperIos alloc] init:this];
 
 #if CC_VIDEOPLAYER_DEBUG_DRAW

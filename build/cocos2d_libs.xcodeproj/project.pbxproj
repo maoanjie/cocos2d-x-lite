@@ -1378,6 +1378,7 @@
 		BAFF7DD91D5C1CF80051B92F /* VertexAttachment.c in Sources */ = {isa = PBXBuildFile; fileRef = BAFF7D441D5C1CF80051B92F /* VertexAttachment.c */; };
 		BAFF7DDA1D5C1CF80051B92F /* VertexAttachment.h in Headers */ = {isa = PBXBuildFile; fileRef = BAFF7D451D5C1CF80051B92F /* VertexAttachment.h */; };
 		BAFF7DDB1D5C1CF80051B92F /* VertexAttachment.h in Headers */ = {isa = PBXBuildFile; fileRef = BAFF7D451D5C1CF80051B92F /* VertexAttachment.h */; };
+		D4DA0ABE21FAB7F900AAC972 /* libffmpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D4DA0ABD21FAB7F900AAC972 /* libffmpeg.a */; };
 		DABC9FA919E7DFA900FA252C /* CCClippingRectangleNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DABC9FA719E7DFA900FA252C /* CCClippingRectangleNode.cpp */; };
 		DABC9FAA19E7DFA900FA252C /* CCClippingRectangleNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DABC9FA719E7DFA900FA252C /* CCClippingRectangleNode.cpp */; };
 		DABC9FAB19E7DFA900FA252C /* CCClippingRectangleNode.h in Headers */ = {isa = PBXBuildFile; fileRef = DABC9FA819E7DFA900FA252C /* CCClippingRectangleNode.h */; };
@@ -2306,6 +2307,7 @@
 		BAFF7D431D5C1CF80051B92F /* TransformConstraintData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TransformConstraintData.h; sourceTree = "<group>"; };
 		BAFF7D441D5C1CF80051B92F /* VertexAttachment.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = VertexAttachment.c; sourceTree = "<group>"; };
 		BAFF7D451D5C1CF80051B92F /* VertexAttachment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VertexAttachment.h; sourceTree = "<group>"; };
+		D4DA0ABD21FAB7F900AAC972 /* libffmpeg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libffmpeg.a; path = ../external/ios/libs/libffmpeg.a; sourceTree = "<group>"; };
 		DABC9FA719E7DFA900FA252C /* CCClippingRectangleNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CCClippingRectangleNode.cpp; sourceTree = "<group>"; };
 		DABC9FA819E7DFA900FA252C /* CCClippingRectangleNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCClippingRectangleNode.h; sourceTree = "<group>"; };
 		ED3057761BEC76C90083C3ED /* crypt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = crypt.h; path = ../external/sources/unzip/crypt.h; sourceTree = "<group>"; };
@@ -2427,6 +2429,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D4DA0ABE21FAB7F900AAC972 /* libffmpeg.a in Frameworks */,
 				1A9A4C6E1F98B1C000C14552 /* libcocosanalytics.a in Frameworks */,
 				A60A9D661C200E5A0070800A /* libchipmunk.a in Frameworks */,
 				EDE5DFF81C0D6B3F0014147A /* libwebsockets.a in Frameworks */,
@@ -2479,6 +2482,7 @@
 		1551A341158F2AB200E66CFE /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D4DA0ABD21FAB7F900AAC972 /* libffmpeg.a */,
 				1A9A4C6D1F98B1C000C14552 /* libcocosanalytics.a */,
 				1ACF6A3A1E4AFDC80033C137 /* libcrypto.a */,
 				1ACF6A3B1E4AFDC80033C137 /* libssl.a */,
@@ -5791,6 +5795,7 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				ENABLE_BITCODE = NO;
 				EXECUTABLE_PREFIX = "";
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../runtime-src/ios-common/SDK/BaiduCloudPlayer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "../cocos/platform/ios/cocos2d-prefix.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
@@ -5816,6 +5821,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_BITCODE = NO;
 				EXECUTABLE_PREFIX = "";
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../runtime-src/ios-common/SDK/BaiduCloudPlayer";
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "../cocos/platform/ios/cocos2d-prefix.pch";
