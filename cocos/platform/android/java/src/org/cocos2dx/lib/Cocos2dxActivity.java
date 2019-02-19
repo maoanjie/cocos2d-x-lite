@@ -413,6 +413,13 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
 
         // Cocos2dxGLSurfaceView
         this.mGLSurfaceView = this.onCreateView();
+        // added by anjay 2019/02/19
+        // 调整视频播放zorder
+        this.mGLSurfaceView.setZOrderOnTop(true);
+        this.mGLSurfaceView.setZOrderMediaOverlay(true);
+        this.mGLSurfaceView.setEGLContextClientVersion(2);
+        // added by anjay finished
+
 
         // ...add to FrameLayout
         mFrameLayout.addView(this.mGLSurfaceView);

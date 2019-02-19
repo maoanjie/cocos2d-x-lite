@@ -211,7 +211,7 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
                 mOnVideoEventListener.onVideoEvent(mViewTag,EVENT_CLICKED);
             }
         }
-        return true;
+        return false;
     }
 
     private boolean mIsAssetRouse = false;
@@ -531,22 +531,22 @@ IMediaPlayer.OnPreparedListener mPreparedListener = new IMediaPlayer.OnPreparedL
                 int titleId = r.getIdentifier("VideoView_error_title", "string", "android");
                 int buttonStringId = r.getIdentifier("VideoView_error_button", "string", "android");
 
-                new AlertDialog.Builder(mCocos2dxActivity)
-                        .setTitle(r.getString(titleId))
-                        .setMessage(messageId)
-                        .setPositiveButton(r.getString(buttonStringId),
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
+//                new AlertDialog.Builder(mCocos2dxActivity)
+//                        .setTitle(r.getString(titleId))
+//                        .setMessage(messageId)
+//                        .setPositiveButton(r.getString(buttonStringId),
+//                                new DialogInterface.OnClickListener() {
+//                                    public void onClick(DialogInterface dialog, int whichButton) {
                                         /* If we get here, there is no onError listener, so
                                          * at least inform them that the video is over.
                                          */
                                         if (mOnVideoEventListener != null) {
                                             mOnVideoEventListener.onVideoEvent(mViewTag,EVENT_COMPLETED);
                                         }
-                                    }
-                                })
-                        .setCancelable(false)
-                        .show();
+//                                    }
+//                                })
+//                        .setCancelable(false)
+//                        .show();
             }
             return true;
         }

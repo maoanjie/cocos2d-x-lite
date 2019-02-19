@@ -61,7 +61,7 @@ using namespace cocos2d::experimental::ui;
 -(id) init:(void*) videoPlayer;
 
 -(void) videoFinished:(NSNotification*) notification;
--(void) playStateChange;
+-(void) playStateChange:(NSNotification*) notification;
 
 
 @end
@@ -260,17 +260,22 @@ using namespace cocos2d::experimental::ui;
 //                                                 name:MPMovieDurationAvailableNotification
 //                                               object:nil];
 //
-//    [[NSNotificationCenter defaultCenter] addObserver:self
-//                                             selector:@selector(loadStateUpdate:)
-//                                                 name:MPMoviePlayerLoadStateDidChangeNotification
-//                                               object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(loadStateUpdate:)
+                                                 name:MPMoviePlayerLoadStateDidChangeNotification
+                                               object:nil];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(onPlayerPrepared:)
+                                                 name:BDCloudMediaPlayerPlaybackIsPreparedToPlayNotification
+                                               object:nil];
+
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(videoFinished:)
                                                  name:BDCloudMediaPlayerPlaybackDidFinishNotification
                                                object:self.mediaPlayer];
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(playStateChange)
+                                             selector:@selector(playStateChange:)
                                                  name:BDCloudMediaPlayerPlaybackStateDidChangeNotification
                                                object:self.mediaPlayer];
     
@@ -294,7 +299,7 @@ using namespace cocos2d::experimental::ui;
     [self.mediaPlayer.view addGestureRecognizer:singleFingerTap];
     
 //    [self.moviePlayer prepareToPlay];
-    self.mediaPlayer.shouldAutoplay = YES;
+//    self.mediaPlayer.shouldAutoplay = YES;
     [self.mediaPlayer prepareToPlay];
     
     singleFingerTap.delegate = self;
@@ -317,6 +322,17 @@ using namespace cocos2d::experimental::ui;
     return YES;
 }
 
+- (void)onPlayerPrepared:(NSNotification*)notification {
+    if (notification.object != self.mediaPlayer) {
+        return;
+    }
+    
+    if(_videoPlayer != nullptr) {
+        _videoPlayer->onPlayEvent((int)VideoPlayer::EventType::READY_TO_PLAY);
+    }
+
+}
+
 -(void) videoFinished:(NSNotification *)notification
 {
 //    if(_videoPlayer != nullptr)
@@ -328,14 +344,33 @@ using namespace cocos2d::experimental::ui;
 //    }
     if(_videoPlayer != nullptr)
     {
-        if([self.mediaPlayer playbackState] != BDCloudMediaPlayerPlaybackStateStopped)
-        {
-            _videoPlayer->onPlayEvent((int)VideoPlayer::EventType::COMPLETED);
+//        BDCloudMediaPlayerPlaybackState state = [self.mediaPlayer playbackState];
+//        if(state != BDCloudMediaPlayerPlaybackStateStopped)
+//        {
+//            _videoPlayer->onPlayEvent((int)VideoPlayer::EventType::COMPLETED);
+//        }
+        NSNumber* reasonNumber = notification.userInfo[BDCloudMediaPlayerPlaybackDidFinishReasonUserInfoKey];
+        BDCloudMediaPlayerFinishReason reason = (BDCloudMediaPlayerFinishReason)reasonNumber.integerValue;
+        switch (reason) {
+            case BDCloudMediaPlayerFinishReasonEnd:
+                NSLog(@"player finish with reason: play to end time");
+                _videoPlayer->onPlayEvent((int)VideoPlayer::EventType::COMPLETED);
+                break;
+            case BDCloudMediaPlayerFinishReasonError:
+                NSLog(@"player finished with reason: error");
+                _videoPlayer->onPlayEvent((int)VideoPlayer::EventType::COMPLETED);
+                break;
+            case BDCloudMediaPlayerFinishReasonUser:
+                NSLog(@"player finished with reason: stopped by user");
+                _videoPlayer->onPlayEvent((int)VideoPlayer::EventType::COMPLETED);
+                break;
+            default:
+                break;
         }
     }
 }
 
--(void) playStateChange
+-(void) playStateChange:(NSNotification*) notification
 {
 //    MPMoviePlaybackState state = [self.moviePlayer playbackState];
 //    switch (state) {
@@ -362,11 +397,11 @@ using namespace cocos2d::experimental::ui;
 //       state == MPMovieLoadStatePlaythroughOK) {
 //        _videoPlayer->onPlayEvent((int)VideoPlayer::EventType::READY_TO_PLAY);
 //    }
-    BDCloudMediaPlayerLoadState state = [self.mediaPlayer loadState];
-    if(state == BDCloudMediaPlayerLoadStatePlayable ||
-       state == BDCloudMediaPlayerLoadStatePlaythroughOK) {
-        _videoPlayer->onPlayEvent((int)VideoPlayer::EventType::READY_TO_PLAY);
-    }
+//    BDCloudMediaPlayerLoadState state = [self.mediaPlayer loadState];
+//    if(state == BDCloudMediaPlayerLoadStatePlayable ||
+//       state == BDCloudMediaPlayerLoadStatePlaythroughOK) {
+//        _videoPlayer->onPlayEvent((int)VideoPlayer::EventType::READY_TO_PLAY);
+//    }
 }
 
 -(void) metadataUpdate:(NSNotification *)notification
