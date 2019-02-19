@@ -242,7 +242,8 @@ using namespace cocos2d::experimental::ui;
     auto view = cocos2d::Director::getInstance()->getOpenGLView();
     auto eaglview = (CCEAGLView *) view->getEAGLView();
 //    [eaglview addSubview:self.moviePlayer.view];
-    [eaglview addSubview:self.mediaPlayer.view];
+//    [eaglview addSubview:self.mediaPlayer.view];
+    [[eaglview.superview viewWithTag:1] addSubview:self.mediaPlayer.view];
 
 
 //    [[NSNotificationCenter defaultCenter] addObserver:self
