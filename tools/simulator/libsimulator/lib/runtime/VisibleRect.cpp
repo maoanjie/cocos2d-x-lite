@@ -1,5 +1,6 @@
 /****************************************************************************
- Copyright (c) 2013-2014 Chukong Technologies Inc.
+ Copyright (c) 2013-2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -30,7 +31,8 @@ void VisibleRect::lazyInit()
 {
     // no lazy init
     // Useful if we change the resolution in runtime
-    s_visibleRect = cocos2d::Director::getInstance()->getOpenGLView()->getVisibleRect();
+//    s_visibleRect = cocos2d::Director::getInstance()->getOpenGLView()->getVisibleRect();
+    CCLOG("lazyInit");
 }
 
 cocos2d::Rect VisibleRect::getVisibleRect()

@@ -1,5 +1,6 @@
 /****************************************************************************
- Copyright (c) 2017 Chukong Technologies Inc.
+ Copyright (c) 2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -29,20 +30,37 @@
 #define SCRIPT_ENGINE_JSC            3
 #define SCRIPT_ENGINE_CHAKRACORE     4
 
-#if defined(__APPLE__) // macOS and iOS use JavaScriptCore
-    #define SCRIPT_ENGINE_TYPE           SCRIPT_ENGINE_JSC
+#define SCRIPT_ENGINE_V8_ON_MAC      1 // default using v8 on macOS, set 0 to disable
+
+#if defined(__APPLE__)
+    #include <TargetConditionals.h>
+    #if TARGET_OS_OSX && SCRIPT_ENGINE_V8_ON_MAC
+        #define SCRIPT_ENGINE_TYPE           SCRIPT_ENGINE_V8
+    #else
+        #define SCRIPT_ENGINE_TYPE           SCRIPT_ENGINE_JSC
+    #endif
 #elif defined(ANDROID) || (defined(_WIN32) && defined(_WINDOWS)) // Windows and Android use V8
     #define SCRIPT_ENGINE_TYPE           SCRIPT_ENGINE_V8
 #else
     #error "Unknown Script Engine"
 #endif
 
+#ifndef USE_V8_DEBUGGER
 #if defined(COCOS2D_DEBUG) && COCOS2D_DEBUG > 0
+#define USE_V8_DEBUGGER 1
+#else
+#define USE_V8_DEBUGGER 0
+#endif
+#endif
+
+#if !defined(ANDROID_INSTANT) && defined(USE_V8_DEBUGGER) && USE_V8_DEBUGGER > 0
 #define SE_ENABLE_INSPECTOR 1
 #define SE_DEBUG 2
+#define HAVE_INSPECTOR 1
 #else
 #define SE_ENABLE_INSPECTOR 0
 #define SE_DEBUG 0
+#define HAVE_INSPECTOR 0
 #endif
 
 #ifdef ANDROID
@@ -63,16 +81,17 @@
 #define QUOTEME(x) QUOTEME_(x)
 #endif
 
-void seLog(const char * format, ...);
+void seLogD(const char * format, ...);
+void seLogE(const char * format, ...);
 
 #define LOG_TAG    "jswrapper"
-#define SE_LOGD(fmt, ...) seLog("D/" LOG_TAG " (" QUOTEME(__LINE__) "): " fmt "", ##__VA_ARGS__)
-#define SE_LOGE(fmt, ...) seLog("E/" LOG_TAG " (" QUOTEME(__LINE__) "): " fmt "", ##__VA_ARGS__)
+#define SE_LOGD(fmt, ...) seLogD("D/" LOG_TAG " (" QUOTEME(__LINE__) "): " fmt "", ##__VA_ARGS__)
+#define SE_LOGE(fmt, ...) seLogE("E/" LOG_TAG " (" QUOTEME(__LINE__) "): " fmt "", ##__VA_ARGS__)
 
 #else
 
-#define SE_LOGD(...) do { printf(__VA_ARGS__); fflush(stdout); } while (false)
-#define SE_LOGE(...) do { printf(__VA_ARGS__); fflush(stdout); } while (false)
+#define SE_LOGD(...) do { fprintf(stdout, __VA_ARGS__); fflush(stdout); } while (false)
+#define SE_LOGE(...) do { fprintf(stderr, __VA_ARGS__); fflush(stderr); } while (false)
 
 #endif
 

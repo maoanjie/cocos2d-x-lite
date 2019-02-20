@@ -1,5 +1,6 @@
 /****************************************************************************
- Copyright (c) 2017 Chukong Technologies Inc.
+ Copyright (c) 2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -50,6 +51,8 @@
 #else
 #define TRACE_DEBUGGER_SERVER(...)
 #endif // #if COCOS2D_DEBUG
+
+uint32_t __jsbInvocationCount = 0;
 
 namespace se {
 
@@ -489,6 +492,8 @@ namespace se {
         _oldCompartment = JS_EnterCompartment(_cx, rootedGlobalObj);
         JS_InitStandardClasses(_cx, rootedGlobalObj) ;
 
+        _globalObj->setProperty("window", Value(_globalObj));
+
         // SpiderMonkey isn't shipped with a console variable. Make a fake one.
         Value consoleVal;
         bool hasConsole = _globalObj->getProperty("console", &consoleVal) && consoleVal.isObject();
@@ -519,7 +524,7 @@ namespace se {
         JS::SetEnqueuePromiseJobCallback(_cx, onEnqueuePromiseJobCallback);
         JS::SetGetIncumbentGlobalCallback(_cx, onGetIncumbentGlobalCallback);
 
-        __jsb_CCPrivateData_class = Class::create("__CCPrivateData", _globalObj, nullptr, privateDataContructor);
+        __jsb_CCPrivateData_class = Class::create("__PrivateData", _globalObj, nullptr, privateDataContructor);
         __jsb_CCPrivateData_class->defineFinalizeFunction(privateDataFinalize);
         __jsb_CCPrivateData_class->install();
 
@@ -1090,12 +1095,22 @@ namespace se {
         {
             internal::jsToSeValue(_cx, rval, ret);
         }
+
+        if (!ok)
+        {
+            SE_LOGE("ScriptEngine::evalString script %s, failed!\n", fileName);
+        }
         return ok;
     }
 
     void ScriptEngine::setFileOperationDelegate(const FileOperationDelegate& delegate)
     {
         _fileOperationDelegate = delegate;
+    }
+
+    const ScriptEngine::FileOperationDelegate& ScriptEngine::getFileOperationDelegate() const
+    {
+        return _fileOperationDelegate;
     }
 
     bool ScriptEngine::runScript(const std::string& path, Value* ret/* = nullptr */)
@@ -1203,7 +1218,7 @@ namespace se {
         _exceptionCallback = cb;
     }
 
-    void ScriptEngine::enableDebugger(const std::string& serverAddr, uint32_t port)
+    void ScriptEngine::enableDebugger(const std::string& serverAddr, uint32_t port, bool isWait)
     {
         _debuggerServerAddr = serverAddr;
         _debuggerServerPort = port;

@@ -9,8 +9,8 @@ before_install:
 
 # blocklist
 branches:
-  except:
-    - master
+  only:
+    - v2.0-release
 
 env:
   global:

@@ -1,5 +1,6 @@
 /****************************************************************************
- Copyright (c) 2014-2017 Chukong Technologies Inc.
+ Copyright (c) 2014-2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -37,7 +38,7 @@
 #include "OpenalSoft/alext.h"
 #endif
 #include "audio/include/AudioEngine.h"
-#include "base/CCDirector.h"
+#include "platform/CCApplication.h"
 #include "base/CCScheduler.h"
 #include "platform/CCFileUtils.h"
 #include "audio/win32/AudioDecoderManager.h"
@@ -47,7 +48,7 @@
 // log, CCLOG aren't threadsafe, since we uses sub threads for parsing pcm data, threadsafe log output
 // is needed. Define the following macros (ALOGV, ALOGD, ALOGI, ALOGW, ALOGE) for threadsafe log output.
 
-//FIXME: Move _winLog, winLog to a separated file
+//IDEA: Move _winLog, winLog to a separated file
 static void _winLog(const char *format, va_list args)
 {
     static const int MAX_LOG_LENGTH = 16 * 1024;
@@ -104,7 +105,6 @@ void audioLog(const char * format, ...)
 }
 
 using namespace cocos2d;
-using namespace cocos2d::experimental;
 
 static ALCdevice *s_ALDevice = nullptr;
 static ALCcontext *s_ALContext = nullptr;
@@ -121,7 +121,7 @@ AudioEngineImpl::~AudioEngineImpl()
 {
     if (_scheduler != nullptr)
     {
-        _scheduler->unschedule(CC_SCHEDULE_SELECTOR(AudioEngineImpl::update), this);
+        _scheduler->unschedule("AudioEngine", this);
     }
 
     if (s_ALContext) {
@@ -165,7 +165,7 @@ bool AudioEngineImpl::init()
                 _alSourceUsed[_alSources[i]] = false;
             }
 
-            _scheduler = Director::getInstance()->getScheduler();
+            _scheduler = Application::getInstance()->getScheduler();
             ret = AudioDecoderManager::init();
             ALOGI("OpenAL was initialized successfully!");
         }
@@ -251,7 +251,7 @@ int AudioEngineImpl::play2d(const std::string &filePath ,bool loop ,float volume
 
     if (_lazyInitLoop) {
         _lazyInitLoop = false;
-        _scheduler->schedule(CC_SCHEDULE_SELECTOR(AudioEngineImpl::update), this, 0.05f, false);
+        _scheduler->schedule(CC_CALLBACK_1(AudioEngineImpl::update, this), this, 0.05f, false, "AudioEngine");
     }
 
     return _currentAudioID++;
@@ -490,7 +490,7 @@ void AudioEngineImpl::update(float dt)
             _threadMutex.unlock();
 
             if (player->_finishCallbak) {
-                player->_finishCallbak(audioID, filePath); //FIXME: callback will delay 50ms
+                player->_finishCallbak(audioID, filePath); //IDEA: callback will delay 50ms
             }
             delete player;
             _alSourceUsed[alSource] = false;
@@ -502,7 +502,7 @@ void AudioEngineImpl::update(float dt)
 
     if(_audioPlayers.empty()){
         _lazyInitLoop = true;
-        _scheduler->unschedule(CC_SCHEDULE_SELECTOR(AudioEngineImpl::update), this);
+        _scheduler->unschedule("AudioEngine", this);
     }
 }
 

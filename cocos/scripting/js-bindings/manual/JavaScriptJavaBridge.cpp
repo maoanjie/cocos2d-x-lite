@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2013-2016 Chukong Technologies Inc.
+ * Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,9 +37,14 @@
 
 #define LOG_TAG "JavaScriptJavaBridge"
 
+#ifndef ORG_JAVABRIDGE_CLASS_NAME
+#define ORG_JAVABRIDGE_CLASS_NAME org_cocos2dx_lib_Cocos2dxJavascriptJavaBridge
+#endif
+#define JNI_JSJAVABRIDGE(FUNC) JNI_METHOD1(ORG_JAVABRIDGE_CLASS_NAME,FUNC)
+
 extern "C" {
 
-JNIEXPORT jint JNICALL Java_org_cocos2dx_lib_Cocos2dxJavascriptJavaBridge_evalString
+JNIEXPORT jint JNICALL JNI_JSJAVABRIDGE(evalString)
         (JNIEnv *env, jclass cls, jstring value)
 {
     se::AutoHandleScope hs;
@@ -46,7 +52,7 @@ JNIEXPORT jint JNICALL Java_org_cocos2dx_lib_Cocos2dxJavascriptJavaBridge_evalSt
     std::string strValue = cocos2d::StringUtils::getStringUTFCharsJNI(env, value, &strFlag);
     if (!strFlag)
     {
-        CCLOG("Cocos2dxJavaScriptJavaBridge_evalString error, invalid string code");
+        CCLOG("JavaScriptJavaBridge_evalString error, invalid string code");
         return 0;
     }
     se::ScriptEngine::getInstance()->evalString(strValue.c_str());
@@ -205,9 +211,14 @@ bool JavaScriptJavaBridge::CallInfo::execute()
         case JavaScriptJavaBridge::ValueType::STRING:
         {
             m_retjstring = (jstring)m_env->CallStaticObjectMethod(m_classID, m_methodID);
-            std::string strValue = cocos2d::StringUtils::getStringUTFCharsJNI(m_env, m_retjstring);
+            if (m_retjstring)
+            {
+                std::string strValue = cocos2d::StringUtils::getStringUTFCharsJNI(m_env, m_retjstring);
+                m_ret.stringValue = new std::string(strValue);
+            }
+            else
+                m_ret.stringValue = nullptr;
 
-            m_ret.stringValue = new std::string(strValue);
             break;
         }
 
@@ -427,7 +438,10 @@ bool JavaScriptJavaBridge::convertReturnValue(ReturnValue retValue, ValueType ty
             ret->setBoolean(retValue.boolValue);
             break;
         case JavaScriptJavaBridge::ValueType::STRING:
-            ret->setString(*retValue.stringValue);
+            if (retValue.stringValue)
+                ret->setString(*retValue.stringValue);
+            else
+                ret->setNull();
             break;
         default:
             ret->setUndefined();
@@ -540,11 +554,22 @@ static bool JavaScriptJavaBridge_callStaticMethod(se::State& s)
                         break;
                     }
                     case JavaScriptJavaBridge::ValueType::STRING:
+                    {
+                        const auto &arg = args[index];
+                        if (arg.isNull() || arg.isUndefined())
+                            jargs[i].l = nullptr;
+                        else
+                        {
+                            std::string str;
+                            seval_to_std_string(args[index], &str);
+                            jargs[i].l = call.getEnv()->NewStringUTF(str.c_str());
+                            toReleaseObjects.push_back(jargs[i].l);
+                        }
+
+                        break;
+                    }
                     default:
-                        std::string str;
-                        seval_to_std_string(args[index], &str);
-                        jargs[i].l = call.getEnv()->NewStringUTF(str.c_str());
-                        toReleaseObjects.push_back(jargs[i].l);
+                        SE_REPORT_ERROR("Unsupport type of parameter %d", i);
                         break;
                 }
             }
@@ -558,7 +583,7 @@ static bool JavaScriptJavaBridge_callStaticMethod(se::State& s)
             int errorCode = call.getErrorCode();
             if (!ok || errorCode < 0)
             {
-                SE_REPORT_ERROR("js_cocos2dx_JSJavaBridge : call result code: %d", errorCode);
+                SE_REPORT_ERROR("js_JSJavaBridge : call result code: %d", errorCode);
                 return false;
             }
 

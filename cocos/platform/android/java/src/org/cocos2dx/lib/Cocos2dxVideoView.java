@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2006 The Android Open Source Project
- * Copyright (c) 2014 Chukong Technologies Inc.
+ * Copyright (c) 2014-2016 Chukong Technologies Inc.
+ * Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +35,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.FrameLayout;
 import android.widget.MediaController.MediaPlayerControl;
+import android.widget.RelativeLayout;
 
 import java.io.IOException;
 import java.util.Map;
@@ -115,18 +117,15 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        if (mVideoWidth == 0 || mVideoHeight == 0) {
-            setMeasuredDimension(mViewWidth, mViewHeight);
-            Log.i(TAG, ""+mViewWidth+ ":" +mViewHeight);
-        }
-        else {
-            setMeasuredDimension(mVisibleWidth, mVisibleHeight);
-            Log.i(TAG, ""+mVisibleWidth+ ":" +mVisibleHeight);
-        }
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        setMeasuredDimension(mVisibleWidth, mVisibleHeight);
 
     }
 
     public void setVideoRect(int left, int top, int maxWidth, int maxHeight) {
+        if (mViewLeft == left && mViewTop == top && mViewWidth == maxWidth && mViewHeight == maxHeight)
+            return;
+
         mViewLeft = left;
         mViewTop = top;
         mViewWidth = maxWidth;
@@ -135,14 +134,9 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
         fixSize(mViewLeft, mViewTop, mViewWidth, mViewHeight);
     }
 
-    public void setFullScreenEnabled(boolean enabled, int width, int height) {
+    public void setFullScreenEnabled(boolean enabled) {
         if (mFullScreenEnabled != enabled) {
             mFullScreenEnabled = enabled;
-            if (width != 0 && height != 0) {
-                mFullScreenWidth = width;
-                mFullScreenHeight = height;
-            }
-
             fixSize();
         }
     }
@@ -182,10 +176,11 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
     @Override
     public void setVisibility(int visibility) {
         if (visibility == INVISIBLE) {
-            if(getCurrentPosition() > 0 && mSeekWhenPrepared == 0) {
+            if (getCurrentPosition() > 0 && mSeekWhenPrepared == 0) {
                 mSeekWhenPrepared = getCurrentPosition();
             }
         }
+
         super.setVisibility(visibility);
     }
 
@@ -222,14 +217,16 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
         if (path.startsWith(AssetResourceRoot)) {
             path = path.substring(AssetResourceRoot.length());
         }
+
         if (path.startsWith("/")) {
             mIsAssetRouse = false;
             setVideoURI(Uri.parse(path),null);
         }
         else {
+
             mVideoFilePath = path;
             mIsAssetRouse = true;
-            setVideoURI(Uri.parse(path),null);
+            setVideoURI(Uri.parse(path), null);
         }
     }
 
@@ -274,7 +271,7 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
         }
 
         // Tell the music playback service to pause
-        // TODO: these constants need to be published somewhere in the framework.
+        // REFINE: these constants need to be published somewhere in the framework.
         Intent i = new Intent("com.android.music.musicservicecommand");
         i.putExtra("command", "pause");
         mCocos2dxActivity.sendBroadcast(i);
@@ -323,7 +320,7 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
                 mVideoUri = Uri.fromFile(new File(mVideoFilePath));
                 mMediaPlayer.setDataSource(mCocos2dxActivity, mVideoUri);
             } else {
-                mMediaPlayer.setDataSource(mCocos2dxActivity, mVideoUri);
+                mMediaPlayer.setDataSource(mVideoUri.toString());
             }
 
             mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -362,6 +359,9 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
 
     public void fixSize() {
         if (mFullScreenEnabled) {
+            mFullScreenWidth = mCocos2dxActivity.getGLSurfaceView().getWidth();
+            mFullScreenHeight = mCocos2dxActivity.getGLSurfaceView().getHeight();
+
             fixSize(0, 0, mFullScreenWidth, mFullScreenHeight);
         } else {
             fixSize(mViewLeft, mViewTop, mViewWidth, mViewHeight);
@@ -376,7 +376,7 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
             mVisibleHeight = height;
         }
         else if (width != 0 && height != 0) {
-            if (mKeepRatio) {
+            if (mKeepRatio && !mFullScreenEnabled) {
                 if ( mVideoWidth * height  > width * mVideoHeight ) {
                     mVisibleWidth = width;
                     mVisibleHeight = width * mVideoHeight / mVideoWidth;
@@ -402,11 +402,10 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
 
         getHolder().setFixedSize(mVisibleWidth, mVisibleHeight);
 
-        FrameLayout.LayoutParams lParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT);
+        RelativeLayout.LayoutParams lParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
+                RelativeLayout.LayoutParams.MATCH_PARENT);
         lParams.leftMargin = mVisibleLeft;
         lParams.topMargin = mVisibleTop;
-        lParams.gravity = Gravity.TOP | Gravity.LEFT;
         setLayoutParams(lParams);
     }
 
@@ -646,6 +645,7 @@ IMediaPlayer.OnPreparedListener mPreparedListener = new IMediaPlayer.OnPreparedL
         }
     }
 
+    @Override
     public void start() {
         if (isInPlaybackState()) {
             mMediaPlayer.start();
@@ -653,16 +653,16 @@ IMediaPlayer.OnPreparedListener mPreparedListener = new IMediaPlayer.OnPreparedL
             if (mCurrentState != STATE_PLAYING && mOnVideoEventListener != null) {
                 mOnVideoEventListener.onVideoEvent(mViewTag, EVENT_PLAYING);
             }
-
             mCurrentState = STATE_PLAYING;
-
-            mTargetState = STATE_PLAYING;
         }
+        mTargetState = STATE_PLAYING;
     }
 
+    @Override
     public void pause() {
         if (isInPlaybackState()) {
             if (mMediaPlayer.isPlaying()) {
+                mSeekWhenPrepared = mMediaPlayer.getCurrentPosition();
                 mMediaPlayer.pause();
                 mCurrentState = STATE_PAUSED;
                 if (mOnVideoEventListener != null) {
@@ -707,7 +707,8 @@ IMediaPlayer.OnPreparedListener mPreparedListener = new IMediaPlayer.OnPreparedL
             mTargetState = STATE_PLAYING;
         }
     }
-    // cache duration as mDuration for faster access
+
+    @Override
     public int getDuration() {
         if (isInPlaybackState()) {
             if (mDuration > 0) {
@@ -720,6 +721,7 @@ IMediaPlayer.OnPreparedListener mPreparedListener = new IMediaPlayer.OnPreparedL
         return mDuration;
     }
 
+    @Override
     public int getCurrentPosition() {
         if (isInPlaybackState()) {
             return (int)mMediaPlayer.getCurrentPosition();
@@ -728,6 +730,7 @@ IMediaPlayer.OnPreparedListener mPreparedListener = new IMediaPlayer.OnPreparedL
         }
     }
 
+    @Override
     public void seekTo(int msec) {
         Log.w(TAG,"seek to :"+msec);
         if (isInPlaybackState()) {
@@ -738,10 +741,12 @@ IMediaPlayer.OnPreparedListener mPreparedListener = new IMediaPlayer.OnPreparedL
         }
     }
 
+    @Override
     public boolean isPlaying() {
         return isInPlaybackState() && mMediaPlayer.isPlaying();
     }
 
+    @Override
     public int getBufferPercentage() {
         if (mMediaPlayer != null) {
             return mCurrentBufferPercentage;
@@ -774,5 +779,11 @@ IMediaPlayer.OnPreparedListener mPreparedListener = new IMediaPlayer.OnPreparedL
 
     public int getAudioSessionId () {
        return mMediaPlayer.getAudioSessionId();
+    }
+
+    public void setVolume (float volume) {
+        if (mMediaPlayer != null) {
+            mMediaPlayer.setVolume(volume, volume);
+        }
     }
 }

@@ -3,12 +3,12 @@ import org.apache.tools.ant.taskdefs.condition.Os
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 22
-    buildToolsVersion '26.0.2'
+    compileSdkVersion PROP_COMPILE_SDK_VERSION.toInteger()
+    buildToolsVersion PROP_BUILD_TOOLS_VERSION
 
     defaultConfig {
         applicationId "org.cocos2dx.hellojavascript"
-        minSdkVersion 10
+        minSdkVersion PROP_MIN_SDK_VERSION
         targetSdkVersion PROP_TARGET_SDK_VERSION
         versionCode 1
         versionName "1.0"
@@ -18,8 +18,7 @@ android {
                 if (!project.hasProperty("PROP_NDK_MODE") || PROP_NDK_MODE.compareTo('none') != 0) {
                     // skip the NDK Build step if PROP_NDK_MODE is none
                     targets 'cocos2djs'
-                    arguments 'NDK_TOOLCHAIN_VERSION=4.9'
-                    arguments 'APP_PLATFORM=android-'+PROP_TARGET_SDK_VERSION
+                    arguments 'NDK_TOOLCHAIN_VERSION=clang'
                     
                     def module_paths = [project.file("${COCOS_X_ROOT}"),
                                         project.file("${COCOS_X_ROOT}/cocos"),
@@ -68,7 +67,11 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            debuggable false
+            jniDebuggable false
+            renderscriptDebuggable false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             if (project.hasProperty("RELEASE_STORE_FILE")) {
                 signingConfig signingConfigs.release
@@ -82,6 +85,9 @@ android {
         }
 
         debug {
+            debuggable true
+            jniDebuggable true
+            renderscriptDebuggable true
             externalNativeBuild {
                 ndkBuild {
                     arguments 'NDK_DEBUG=1'
@@ -104,6 +110,11 @@ android.applicationVariants.all { variant ->
         copy {
             from "${buildDir}/../../../../../src"
             into "${buildDir}/intermediates/assets/${variant.dirName}/src"
+        }        
+
+        copy {
+            from "${buildDir}/../../../../../jsb-adapter"
+            into "${buildDir}/intermediates/assets/${variant.dirName}/jsb-adapter"
         }
 
         copy {
@@ -111,15 +122,11 @@ android.applicationVariants.all { variant ->
             from "${buildDir}/../../../../../project.json"
             into "${buildDir}/intermediates/assets/${variant.dirName}"
         }
-
-        copy {
-            from "${COCOS_X_ROOT}/cocos/scripting/js-bindings/script"
-            into "${buildDir}/intermediates/assets/${variant.dirName}/script"
-        }
     }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(':libcocos2dx')
+    implementation fileTree(dir: 'libs', include: ['*.jar','*.aar'])
+    implementation fileTree(dir: "${COCOS_X_ROOT}/cocos/platform/android/java/libs", include: ['*.jar'])
+    implementation project(':libcocos2dx')
 }

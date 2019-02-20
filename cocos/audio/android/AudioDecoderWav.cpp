@@ -1,5 +1,6 @@
 /****************************************************************************
-Copyright (c) 2017 Chukong Technologies Inc.
+Copyright (c) 2016 Chukong Technologies Inc.
+Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
 http://www.cocos2d-x.org
 
@@ -28,7 +29,9 @@ THE SOFTWARE.
 #include "audio/android/tinysndfile.h"
 #include "platform/CCFileUtils.h"
 
-namespace cocos2d { namespace experimental {
+#include <assert.h>
+
+namespace cocos2d { 
 
 AudioDecoderWav::AudioDecoderWav()
 {
@@ -109,4 +112,4 @@ bool AudioDecoderWav::decodeToPcm()
     return ret;
 }
 
-}} // namespace cocos2d { namespace experimental {
+} // namespace cocos2d { 

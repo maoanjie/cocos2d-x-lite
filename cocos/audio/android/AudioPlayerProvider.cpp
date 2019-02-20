@@ -1,5 +1,6 @@
 /****************************************************************************
-Copyright (c) 2016-2017 Chukong Technologies Inc.
+Copyright (c) 2016 Chukong Technologies Inc.
+Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
 http://www.cocos2d-x.org
 
@@ -39,7 +40,7 @@ THE SOFTWARE.
 #include <stdlib.h>
 #include <algorithm> // for std::find_if
 
-namespace cocos2d { namespace experimental {
+namespace cocos2d { 
 
 static int getSystemAPILevel()
 {
@@ -357,12 +358,12 @@ AudioPlayerProvider::AudioFileInfo AudioPlayerProvider::getFileInfo(
     if (audioFilePath[0] != '/')
     {
         std::string relativePath;
-        size_t position = audioFilePath.find("assets/");
+        size_t position = audioFilePath.find("@assets/");
 
         if (0 == position)
         {
-            // "assets/" is at the beginning of the path and we don't want it
-            relativePath = audioFilePath.substr(strlen("assets/"));
+            // "@assets/" is at the beginning of the path and we don't want it
+            relativePath = audioFilePath.substr(strlen("@assets/"));
         }
         else
         {
@@ -406,7 +407,7 @@ AudioPlayerProvider::AudioFileInfo AudioPlayerProvider::getFileInfo(
 
 bool AudioPlayerProvider::isSmallFile(const AudioFileInfo &info)
 {
-    //TODO: If file size is smaller than 100k, we think it's a small file. This value should be set by developers.
+    //REFINE: If file size is smaller than 100k, we think it's a small file. This value should be set by developers.
     AudioFileInfo &audioFileInfo = const_cast<AudioFileInfo &>(info);
     size_t judgeCount = sizeof(__audioFileIndicator) / sizeof(__audioFileIndicator[0]);
     size_t pos = audioFileInfo.url.rfind(".");
@@ -515,4 +516,4 @@ void AudioPlayerProvider::resume()
     }
 }
 
-}} // namespace cocos2d { namespace experimental {
+} // namespace cocos2d { 

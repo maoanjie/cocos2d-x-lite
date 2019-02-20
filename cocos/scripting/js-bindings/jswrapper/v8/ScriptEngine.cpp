@@ -1,5 +1,6 @@
 /****************************************************************************
- Copyright (c) 2017 Chukong Technologies Inc.
+ Copyright (c) 2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -32,10 +33,13 @@
 #include "../MappingUtils.hpp"
 
 #if SE_ENABLE_INSPECTOR
-#include "inspector_agent.h"
-#include "env.h"
-#include "node.h"
+#include "debugger/inspector_agent.h"
+#include "debugger/env.h"
+#include "debugger/node.h"
 #endif
+
+uint32_t __jsbInvocationCount = 0;
+uint32_t __jsbStackFrameLimit = 20;
 
 #define RETRUN_VAL_IF_FAIL(cond, val) \
     if (!(cond)) return val
@@ -342,7 +346,7 @@ namespace se {
     , _isErrorHandleWorking(false)
     {
         //        RETRUN_VAL_IF_FAIL(v8::V8::InitializeICUDefaultLocation(nullptr, "/Users/james/Project/v8/out.gn/x64.debug/icudtl.dat"), false);
-        //        v8::V8::InitializeExternalStartupData("/Users/james/Project/v8/out.gn/x64.debug/natives_blob.bin", "/Users/james/Project/v8/out.gn/x64.debug/snapshot_blob.bin"); //TODO
+        //        v8::V8::InitializeExternalStartupData("/Users/james/Project/v8/out.gn/x64.debug/natives_blob.bin", "/Users/james/Project/v8/out.gn/x64.debug/snapshot_blob.bin"); //REFINE
         _platform = v8::platform::CreateDefaultPlatform();
         v8::V8::InitializePlatform(_platform);
         bool ok = v8::V8::Initialize();
@@ -378,7 +382,7 @@ namespace se {
         v8::HandleScope hs(_isolate);
         _isolate->Enter();
 
-        _isolate->SetCaptureStackTraceForUncaughtExceptions(true, 20, v8::StackTrace::kOverview);
+        _isolate->SetCaptureStackTraceForUncaughtExceptions(true, __jsbStackFrameLimit, v8::StackTrace::kOverview);
 
         _isolate->SetFatalErrorHandler(onFatalErrorCallback);
         _isolate->SetOOMErrorHandler(onOOMErrorCallback);
@@ -395,6 +399,7 @@ namespace se {
 
         _globalObj = Object::_createJSObject(nullptr, _context.Get(_isolate)->Global());
         _globalObj->root();
+        _globalObj->setProperty("window", Value(_globalObj));
 
         se::Value consoleVal;
         if (_globalObj->getProperty("console", &consoleVal) && consoleVal.isObject())
@@ -423,7 +428,7 @@ namespace se {
         _globalObj->defineFunction("log", __log);
         _globalObj->defineFunction("forceGC", __forceGC);
 
-        __jsb_CCPrivateData_class = Class::create("__CCPrivateData", _globalObj, nullptr, nullptr);
+        __jsb_CCPrivateData_class = Class::create("__PrivateData", _globalObj, nullptr, nullptr);
         __jsb_CCPrivateData_class->defineFinalizeFunction(privateDataFinalize);
         __jsb_CCPrivateData_class->setCreateProto(false);
         __jsb_CCPrivateData_class->install();
@@ -557,7 +562,7 @@ namespace se {
             _env = node::CreateEnvironment(_isolateData, _context.Get(_isolate), 0, nullptr, 0, nullptr);
 
             node::DebugOptions options;
-            options.set_wait_for_connect(false); // Don't wait for connect, otherwise, the program will be hung up.
+            options.set_wait_for_connect(_isWaitForConnect);// the program will be hung up until debug attach if _isWaitForConnect = true
             options.set_inspector_enabled(true);
             options.set_port((int)_debuggerServerPort);
             options.set_host_name(_debuggerServerAddr.c_str());
@@ -662,13 +667,31 @@ namespace se {
             }
         }
 
-//        assert(success);
+        if (!success)
+        {
+            SE_LOGE("ScriptEngine::evalString script %s, failed!\n", fileName);
+        }
         return success;
+    }
+
+    std::string ScriptEngine::getCurrentStackTrace()
+    {
+        if (!_isValid)
+            return std::string();
+
+        v8::HandleScope hs(_isolate);
+        v8::Local<v8::StackTrace> stack = v8::StackTrace::CurrentStackTrace(_isolate, __jsbStackFrameLimit, v8::StackTrace::kOverview);
+        return stackTraceToString(stack);
     }
 
     void ScriptEngine::setFileOperationDelegate(const FileOperationDelegate& delegate)
     {
         _fileOperationDelegate = delegate;
+    }
+
+    const ScriptEngine::FileOperationDelegate& ScriptEngine::getFileOperationDelegate() const
+    {
+        return _fileOperationDelegate;
     }
 
     bool ScriptEngine::runScript(const std::string& path, Value* ret/* = nullptr */)
@@ -689,7 +712,7 @@ namespace se {
 
     void ScriptEngine::clearException()
     {
-        //FIXME:
+        //IDEA:
     }
 
     void ScriptEngine::setExceptionCallback(const ExceptionCallback& cb)
@@ -702,10 +725,11 @@ namespace se {
         return _context.Get(_isolate);
     }
 
-    void ScriptEngine::enableDebugger(const std::string& serverAddr, uint32_t port)
+    void ScriptEngine::enableDebugger(const std::string& serverAddr, uint32_t port, bool isWait)
     {
         _debuggerServerAddr = serverAddr;
         _debuggerServerPort = port;
+        _isWaitForConnect = isWait;
     }
 
     bool ScriptEngine::isDebuggerEnabled() const

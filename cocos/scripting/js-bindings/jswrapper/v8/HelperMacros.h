@@ -1,5 +1,6 @@
 /****************************************************************************
- Copyright (c) 2017 Chukong Technologies Inc.
+ Copyright (c) 2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -27,6 +28,8 @@
 
 #if SCRIPT_ENGINE_TYPE == SCRIPT_ENGINE_V8
 
+extern uint32_t __jsbInvocationCount;
+
 #ifdef __GNUC__
 #define SE_UNUSED __attribute__ ((unused))
 #else
@@ -34,7 +37,7 @@
 #endif
 
 #define SAFE_INC_REF(obj) if (obj != nullptr) obj->incRef()
-#define SAFE_DEC_REF(obj) if (obj != nullptr) obj->decRef()
+#define SAFE_DEC_REF(obj) if ((obj) != nullptr) { (obj)->decRef(); (obj) = nullptr; }
 
 #define _SE(name) name##Registry
 
@@ -45,11 +48,13 @@
 #define SE_BIND_FUNC(funcName) \
     void funcName##Registry(const v8::FunctionCallbackInfo<v8::Value>& _v8args) \
     { \
+        ++__jsbInvocationCount; \
         bool ret = false; \
         v8::Isolate* _isolate = _v8args.GetIsolate(); \
         v8::HandleScope _hs(_isolate); \
         SE_UNUSED unsigned argc = (unsigned)_v8args.Length(); \
         se::ValueArray args; \
+        args.reserve(10); \
         se::internal::jsToSeArgs(_v8args, &args); \
         void* nativeThisObject = se::internal::getPrivate(_isolate, _v8args.This()); \
         se::State state(nativeThisObject, args); \
@@ -82,10 +87,12 @@
 #define SE_BIND_CTOR(funcName, cls, finalizeCb) \
     void funcName##Registry(const v8::FunctionCallbackInfo<v8::Value>& _v8args) \
     { \
+        ++__jsbInvocationCount; \
         v8::Isolate* _isolate = _v8args.GetIsolate(); \
         v8::HandleScope _hs(_isolate); \
         bool ret = true; \
         se::ValueArray args; \
+        args.reserve(10); \
         se::internal::jsToSeArgs(_v8args, &args); \
         se::Object* thisObject = se::Object::_createJSObject(cls, _v8args.This()); \
         thisObject->_setFinalizeCallback(_SE(finalizeCb)); \
@@ -106,6 +113,7 @@
 #define SE_BIND_PROP_GET(funcName) \
     void funcName##Registry(v8::Local<v8::Name> _property, const v8::PropertyCallbackInfo<v8::Value>& _v8args) \
     { \
+        ++__jsbInvocationCount; \
         v8::Isolate* _isolate = _v8args.GetIsolate(); \
         v8::HandleScope _hs(_isolate); \
         bool ret = true; \
@@ -122,6 +130,7 @@
 #define SE_BIND_PROP_SET(funcName) \
     void funcName##Registry(v8::Local<v8::Name> _property, v8::Local<v8::Value> _value, const v8::PropertyCallbackInfo<void>& _v8args) \
     { \
+        ++__jsbInvocationCount; \
         v8::Isolate* _isolate = _v8args.GetIsolate(); \
         v8::HandleScope _hs(_isolate); \
         bool ret = true; \
@@ -129,6 +138,7 @@
         se::Value data; \
         se::internal::jsToSeValue(_isolate, _value, &data); \
         se::ValueArray args; \
+        args.reserve(10); \
         args.push_back(std::move(data)); \
         se::State state(nativeThisObject, args); \
         ret = funcName(state); \
@@ -144,7 +154,7 @@
 #define SE_QUOTEME_(x) #x
 #define SE_QUOTEME(x) SE_QUOTEME_(x)
 
-//FIXME: implement this macro
+//IDEA: implement this macro
 #define SE_REPORT_ERROR(fmt, ...) SE_LOGE("[ERROR] (" __FILE__ ", " SE_QUOTEME(__LINE__) "): " fmt "\n", ##__VA_ARGS__)
 
 #if COCOS2D_DEBUG > 0

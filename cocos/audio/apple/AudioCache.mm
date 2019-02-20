@@ -1,5 +1,6 @@
 /****************************************************************************
- Copyright (c) 2014-2017 Chukong Technologies Inc.
+ Copyright (c) 2014-2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -32,7 +33,7 @@
 #import <Foundation/Foundation.h>
 #import <OpenAL/alc.h>
 #include <thread>
-#include "base/CCDirector.h"
+#include "platform/CCApplication.h"
 #include "base/CCScheduler.h"
 
 #include "audio/apple/AudioDecoder.h"
@@ -109,7 +110,6 @@ static void setTimeout(double seconds, const std::function<void()>& cb)
 }
 
 using namespace cocos2d;
-using namespace cocos2d::experimental;
 
 AudioCache::AudioCache()
 : _format(-1)
@@ -334,7 +334,7 @@ void AudioCache::readDataTask(unsigned int selfId)
 
     decoder.close();
 
-    //FIXME: Why to invoke play callback first? Should it be after 'load' callback?
+    //IDEA: Why to invoke play callback first? Should it be after 'load' callback?
     invokingPlayCallbacks();
     invokingLoadCallbacks();
 
@@ -419,7 +419,7 @@ void AudioCache::invokingLoadCallbacks()
     }
 
     auto isDestroyed = _isDestroyed;
-    auto scheduler = Director::getInstance()->getScheduler();
+    auto scheduler = Application::getInstance()->getScheduler();
     scheduler->performFunctionInCocosThread([&, isDestroyed](){
         if (*isDestroyed)
         {

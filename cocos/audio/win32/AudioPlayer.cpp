@@ -1,5 +1,6 @@
 /****************************************************************************
- Copyright (c) 2014-2017 Chukong Technologies Inc.
+ Copyright (c) 2014-2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -41,7 +42,6 @@
 #endif
 
 using namespace cocos2d;
-using namespace cocos2d::experimental;
 
 namespace {
 unsigned int __idIndex = 0;

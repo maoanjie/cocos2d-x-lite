@@ -1,5 +1,6 @@
 /****************************************************************************
- Copyright (c) 2014-2017 Chukong Technologies Inc.
+ Copyright (c) 2014-2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -37,7 +38,6 @@
 NS_CC_BEGIN
 class Scheduler;
 
-namespace experimental{
 #define MAX_AUDIOINSTANCES 24
 
 class AudioEngineImpl : public cocos2d::Ref
@@ -87,7 +87,6 @@ private:
     int _currentAudioID;
     Scheduler* _scheduler;
 };
-}
 NS_CC_END
 #endif // __AUDIO_ENGINE_INL_H_
 #endif

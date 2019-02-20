@@ -1,36 +1,39 @@
 #include "BaseObject.h"
-
 DRAGONBONES_NAMESPACE_BEGIN
 
 std::vector<BaseObject*> BaseObject::__allDragonBonesObjects;
-
-std::size_t BaseObject::_hashCode = 0;
-std::size_t BaseObject::_defaultMaxCount = 5000;
-std::unordered_map<std::size_t, std::size_t> BaseObject::_maxCountMap;
-std::unordered_map<std::size_t, std::vector<BaseObject*>> BaseObject::_poolsMap;
+unsigned BaseObject::_hashCode = 0;
+unsigned BaseObject::_defaultMaxCount = 3000;
+std::map<std::size_t, unsigned> BaseObject::_maxCountMap;
+std::map<std::size_t, std::vector<BaseObject*>> BaseObject::_poolsMap;
 BaseObject::RecycleOrDestroyCallback BaseObject::_recycleOrDestroyCallback = nullptr;
 
 void BaseObject::_returnObject(BaseObject* object)
 {
-    const auto classTypeIndex = object->getClassTypeIndex();
-    const auto maxCountIterator = _maxCountMap.find(classTypeIndex);
+    const auto classType = object->getClassTypeIndex();
+    const auto maxCountIterator = _maxCountMap.find(classType);
     const auto maxCount = maxCountIterator != _maxCountMap.end() ? maxCountIterator->second : _defaultMaxCount;
-
-    auto& pool = _poolsMap[classTypeIndex];
-    if (pool.size() < maxCount)
+    auto& pool = _poolsMap[classType];
+    // If script engine gc,then alway push object into pool,not immediately delete
+    // Because object will be referenced more then one place possibly,if delete it immediately,will
+    // crash.
+    if (!DragonBones::checkInPool || pool.size() < maxCount)
     {
-        if (std::find(pool.cbegin(), pool.cend(), object) == pool.cend())
+        if (!object->_isInPool)
         {
+            object->_isInPool = true;
             pool.push_back(object);
+            if (_recycleOrDestroyCallback != nullptr)
+                _recycleOrDestroyCallback(object, 0);
         }
         else
         {
-            DRAGONBONES_ASSERT(false, "The object aleady in pool.");
+            // If script engine gc,repeat push into pool will happen.
+            if(DragonBones::checkInPool)
+            {
+                DRAGONBONES_ASSERT(false, "The object is already in the pool.");
+            }
         }
-
-        object->_isInPool = true;
-        if (_recycleOrDestroyCallback != nullptr)
-            _recycleOrDestroyCallback(object, 0);
     }
     else
     {
@@ -43,18 +46,17 @@ void BaseObject::setObjectRecycleOrDestroyCallback(const std::function<void(Base
     _recycleOrDestroyCallback = cb;
 }
 
-void BaseObject::setMaxCount(std::size_t classTypeIndex, std::size_t maxCount)
+void BaseObject::setMaxCount(std::size_t classType, unsigned maxCount)
 {
-    if (classTypeIndex)
+    if (classType > 0)
     {
-        _maxCountMap[classTypeIndex] = maxCount;
-        const auto iterator = _poolsMap.find(classTypeIndex);
+        const auto iterator = _poolsMap.find(classType);
         if (iterator != _poolsMap.end())
         {
             auto& pool = iterator->second;
-            if (pool.size() > maxCount)
+            if (pool.size() > (size_t)maxCount)
             {
-                for (auto i = maxCount, l = pool.size(); i < l; ++i)
+                for (auto i = (size_t)maxCount, l = pool.size(); i < l; ++i)
                 {
                     delete pool[i];
                 }
@@ -62,38 +64,37 @@ void BaseObject::setMaxCount(std::size_t classTypeIndex, std::size_t maxCount)
                 pool.resize(maxCount);
             }
         }
+
+        _maxCountMap[classType] = maxCount;
     }
     else
     {
         _defaultMaxCount = maxCount;
         for (auto& pair : _poolsMap)
         {
-            if (_maxCountMap.find(pair.first) == _maxCountMap.end())
-            {
-                continue;
-            }
-
-            _maxCountMap[pair.first] = maxCount;
-
             auto& pool = pair.second;
-            if (pool.size() > maxCount)
+            if (pool.size() > (size_t)maxCount)
             {
-                for (auto i = maxCount, l = pool.size(); i < l; ++i)
+                for (auto i = (size_t)maxCount, l = pool.size(); i < l; ++i)
                 {
                     delete pool[i];
                 }
 
                 pool.resize(maxCount);
             }
+
+            if (_maxCountMap.find(pair.first) != _maxCountMap.end())
+            {
+                _maxCountMap[pair.first] = maxCount;
+            }
         }
     }
 }
-
-void BaseObject::clearPool(std::size_t classTypeIndex)
+void BaseObject::clearPool(std::size_t classType)
 {
-    if (classTypeIndex)
+    if (classType > 0)
     {
-        const auto iterator = _poolsMap.find(classTypeIndex);
+        const auto iterator = _poolsMap.find(classType);
         if (iterator != _poolsMap.end())
         {
             auto& pool = iterator->second;
@@ -117,7 +118,6 @@ void BaseObject::clearPool(std::size_t classTypeIndex)
             {
                 for (auto object : pool)
                 {
-//                    printf("delete object: %s, %p\n", typeid(*object).name(), object);
                     delete object;
                 }
 
@@ -128,8 +128,8 @@ void BaseObject::clearPool(std::size_t classTypeIndex)
 }
 
 BaseObject::BaseObject()
-: hashCode(BaseObject::_hashCode++)
-, _isInPool(false)
+:hashCode(BaseObject::_hashCode++)
+,_isInPool(false)
 {
     __allDragonBonesObjects.push_back(this);
 }
@@ -138,7 +138,7 @@ BaseObject::~BaseObject()
 {
     if (_recycleOrDestroyCallback != nullptr)
         _recycleOrDestroyCallback(this, 1);
-
+    
     auto iter = std::find(__allDragonBonesObjects.begin(), __allDragonBonesObjects.end(), this);
     if (iter != __allDragonBonesObjects.end())
     {
@@ -149,10 +149,7 @@ BaseObject::~BaseObject()
 void BaseObject::returnToPool()
 {
     _onClear();
-    // _returnObject make delete this BaseObject,
-    // so after the function invocation, any other operations of
-    // this object should not be done.
-    _returnObject(this);
+    BaseObject::_returnObject(this);
 }
 
 std::vector<BaseObject*>& BaseObject::getAllObjects()

@@ -1,7 +1,8 @@
 /****************************************************************************
  Copyright (c) 2012      greathqy
  Copyright (c) 2012      cocos2d-x.org
- Copyright (c) 2013-2017 Chukong Technologies Inc.
+ Copyright (c) 2013-2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
  
  http://www.cocos2d-x.org
  
@@ -28,8 +29,8 @@
 #include <queue>
 #include <errno.h>
 #include <curl/curl.h>
-#include "base/CCDirector.h"
 #include "platform/CCFileUtils.h"
+#include "platform/CCApplication.h"
 
 NS_CC_BEGIN
 
@@ -399,7 +400,7 @@ HttpClient::HttpClient()
 {
     CCLOG("In the constructor of HttpClient!");
     memset(_responseMessage, 0, RESPONSE_BUFFER_SIZE * sizeof(char));
-    _scheduler = Director::getInstance()->getScheduler();
+    _scheduler = Application::getInstance()->getScheduler();
     increaseThreadCount();
 }
 

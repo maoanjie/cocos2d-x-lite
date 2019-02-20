@@ -1,5 +1,7 @@
 /****************************************************************************
  Copyright (c) 2013 cocos2d-x.org
+ Copyright (c) 2014-2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
  
  http://www.cocos2d-x.org
  
@@ -172,7 +174,14 @@ protected:
      */
     bool versionEquals(const Manifest *b) const;
     
-    /** @brief Check whether the version of this manifest is greater than another.
+    /** @brief Check whether the version of this manifest is greater or equals than another.
+     * @param b         The other manifest
+     * @param [handle]  Customized comparasion handle function
+     * @return Greater or not
+     */
+    bool versionGreaterOrEquals(const Manifest *b, const std::function<int(const std::string& versionA, const std::string& versionB)>& handle) const;
+    
+    /** @brief Check whether the version of this manifest is greater or equals than another.
      * @param b         The other manifest
      * @param [handle]  Customized comparasion handle function
      * @return Greater or not

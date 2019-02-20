@@ -1,6 +1,7 @@
 /****************************************************************************
  Copyright (c) 2015 Chris Hannon http://www.channon.us
- Copyright (c) 2013-2017 Chukong Technologies Inc.
+ Copyright (c) 2013-2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -55,13 +56,12 @@ in the onClose method the pointer should be set to NULL or used to connect to a 
     client->disconnect();
 
  ****************************************************************************/
-
-#ifndef __CC_SOCKETIO_H__
-#define __CC_SOCKETIO_H__
+#pragma once
 
 #include <string>
 #include <unordered_map>
-#include "platform/CCPlatformMacros.h"
+#include <functional>
+#include "base/ccMacros.h"
 #include "base/CCMap.h"
 
 
@@ -298,6 +298,3 @@ NS_CC_END
 
 // end group
 /// @}
-
-#endif /* defined(__CC_JSB_SOCKETIO_H__) */
-

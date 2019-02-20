@@ -1,6 +1,7 @@
 /****************************************************************************
  Copyright (c) 2010-2012 cocos2d-x.org
- Copyright (c) 2013-2017 Chukong Technologies Inc.
+ Copyright (c) 2013-2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -26,16 +27,7 @@
 (http://libwebsockets.org)"
 
  ****************************************************************************/
-
-#include "network/WebSocket.h"
-#include "network/Uri.h"
-#include "base/CCDirector.h"
-#include "base/CCScheduler.h"
-#include "base/CCEventDispatcher.h"
-#include "base/CCEventListenerCustom.h"
-#include "platform/CCFileUtils.h"
-#include "platform/CCStdC.h"
-
+#include "websockets/libwebsockets.h"
 #include <string>
 #include <vector>
 #include <mutex>
@@ -48,8 +40,12 @@
 #include <list>
 #include <signal.h>
 #include <errno.h>
-
-#include "websockets/libwebsockets.h"
+#include "network/WebSocket.h"
+#include "network/Uri.h"
+#include "base/CCScheduler.h"
+#include "platform/CCFileUtils.h"
+#include "platform/CCStdC.h"
+#include "platform/CCApplication.h"
 
 #define NS_NETWORK_BEGIN namespace cocos2d { namespace network {
 #define NS_NETWORK_END }}
@@ -67,7 +63,7 @@ struct lws_vhost;
 // log, CCLOG aren't threadsafe, since we uses sub threads for parsing pcm data, threadsafe log output
 // is needed. Define the following macros (ALOGV, ALOGD, ALOGI, ALOGW, ALOGE) for threadsafe log output.
 
-//FIXME: Move _winLog, winLog to a separated file
+//IDEA: Move _winLog, winLog to a separated file
 static void _winLog(const char *format, va_list args)
 {
     static const int MAX_LOG_LENGTH = 16 * 1024;
@@ -196,10 +192,14 @@ public:
     void send(const unsigned char* binaryMsg, unsigned int len);
     void close();
     void closeAsync();
+    void closeAsync(int code, const std::string &reason);
     cocos2d::network::WebSocket::State getReadyState() const;
     const std::string& getUrl() const;
     const std::string& getProtocol() const;
     cocos2d::network::WebSocket::Delegate* getDelegate() const;
+
+    size_t getBufferedAmount() const;
+    std::string getExtensions() const;
 
 private:
     // The following callback functions are invoked in websocket thread
@@ -232,6 +232,8 @@ private:
     std::mutex _closeMutex;
     std::condition_variable _closeCondition;
 
+    std::vector<std::string> _enabledExtensions;
+
     enum class CloseState
     {
         NONE,
@@ -242,8 +244,6 @@ private:
     CloseState _closeState;
 
     std::string _caFilePath;
-
-    cocos2d::EventListenerCustom* _resetDirectorListener;
 
     friend class WsThreadHelper;
     friend class WebSocketCallbackWrapper;
@@ -292,7 +292,7 @@ static lws_context_creation_info convertToContextCreationInfo(const struct lws_p
     info.port = CONTEXT_PORT_NO_LISTEN;
     info.protocols = protocols;
 
-    // FIXME: Disable 'permessage-deflate' extension temporarily because of issues:
+    // IDEA: Disable 'permessage-deflate' extension temporarily because of issues:
     // https://github.com/cocos2d/cocos2d-x/issues/16045, https://github.com/cocos2d/cocos2d-x/issues/15767
     // libwebsockets issue: https://github.com/warmcat/libwebsockets/issues/593
     // Currently, we couldn't find out the exact reason.
@@ -322,7 +322,7 @@ public:
     WsMessage() : id(++__id), what(0), data(nullptr), user(nullptr){}
     unsigned int id;
     unsigned int what; // message type
-    void* data;
+    cocos2d::network::WebSocket::Data* data;
     void* user;
 
 private:
@@ -350,6 +350,8 @@ public:
 
     // Sends message to Websocket thread. It's needs to be invoked in Cocos thread.
     void sendMessageToWebSocketThread(WsMessage *msg);
+
+    size_t countBufferdBytes(const WebSocketImpl *ws);
 
     // Waits the sub-thread (websocket thread) to exit,
     void joinWebSocketThread();
@@ -438,7 +440,7 @@ void WsThreadHelper::onSubThreadLoop()
             {
                 auto msg = (*iter);
                 auto ws = (WebSocketImpl*)msg->user;
-                // TODO: ws may be a invalid pointer
+                // REFINE: ws may be a invalid pointer
                 if (msg->what == WS_MSG_TO_SUBTHREAD_CREATE_CONNECTION)
                 {
                     ws->onClientOpenConnectionRequest();
@@ -507,7 +509,7 @@ void WsThreadHelper::wsThreadEntryFunc()
 
 void WsThreadHelper::sendMessageToCocosThread(const std::function<void()>& cb)
 {
-    cocos2d::Director::getInstance()->getScheduler()->performFunctionInCocosThread(cb);
+    cocos2d::Application::getInstance()->getScheduler()->performFunctionInCocosThread(cb);
 }
 
 void WsThreadHelper::sendMessageToWebSocketThread(WsMessage *msg)
@@ -515,6 +517,21 @@ void WsThreadHelper::sendMessageToWebSocketThread(WsMessage *msg)
     std::lock_guard<std::mutex> lk(_subThreadWsMessageQueueMutex);
     _subThreadWsMessageQueue->push_back(msg);
 }
+
+size_t WsThreadHelper::countBufferdBytes(const WebSocketImpl *ws)
+{
+    std::lock_guard<std::mutex> lk(_subThreadWsMessageQueueMutex);
+    size_t total = 0;
+    for (auto msg : *_subThreadWsMessageQueue)
+    {
+        if (msg->user == ws && msg->data && (msg->what == WS_MSG_TO_SUBTRHEAD_SENDING_STRING
+        || msg->what == WS_MSG_TO_SUBTRHEAD_SENDING_BINARY)) {
+            total += msg->data->getRemain();
+        }
+    }
+    return total;
+}
+
 
 void WsThreadHelper::joinWebSocketThread()
 {
@@ -727,6 +744,21 @@ bool WebSocketImpl::init(const cocos2d::network::WebSocket::Delegate& delegate,
     return true;
 }
 
+size_t WebSocketImpl::getBufferedAmount() const
+{
+    return __wsHelper->countBufferdBytes(this);
+}
+
+std::string WebSocketImpl::getExtensions() const
+{
+    //join vector with ";"
+    if (_enabledExtensions.empty()) return "";
+    std::string ret;
+    for (int i = 0; i < _enabledExtensions.size(); i++) ret += (_enabledExtensions[i] + "; ");
+    ret += _enabledExtensions[_enabledExtensions.size() - 1];
+    return ret;
+}
+
 void WebSocketImpl::send(const std::string& message)
 {
     if (_readyState == cocos2d::network::WebSocket::State::OPEN)
@@ -817,6 +849,12 @@ void WebSocketImpl::close()
     // Wait 5 milliseconds for onConnectionClosed to exit!
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
     _delegate->onClose(_ws);
+}
+
+void WebSocketImpl::closeAsync(int code, const std::string &reason)
+{
+    lws_close_reason(_wsInstance, (lws_close_status)code, (unsigned char*)const_cast<char*>(reason.c_str()), reason.length());
+    closeAsync();
 }
 
 void WebSocketImpl::closeAsync()
@@ -1419,6 +1457,12 @@ int WebSocketImpl::onSocketCallback(struct lws *wsi, enum lws_callback_reasons r
         case LWS_CALLBACK_PROTOCOL_DESTROY:
             LOGD("protocol destroy...");
             break;
+        case LWS_CALLBACK_CONFIRM_EXTENSION_OKAY:
+            if(in && len > 0)
+            {
+                _enabledExtensions.push_back(std::string((char*)in, 0, len));
+            }
+            break;
         default:
             LOGD("WebSocket (%p) Unhandled websocket event: %d\n", this, reason);
             break;
@@ -1472,10 +1516,25 @@ void WebSocket::closeAsync()
 {
     _impl->closeAsync();
 }
+void WebSocket::closeAsync(int code, const std::string &reason)
+{
+    _impl->closeAsync(code, reason);
+}
+
 
 WebSocket::State WebSocket::getReadyState() const
 {
     return _impl->getReadyState();
+}
+
+std::string WebSocket::getExtensions() const
+{
+    return _impl->getExtensions();
+}
+
+size_t WebSocket::getBufferedAmount() const
+{
+    return _impl->getBufferedAmount();
 }
 
 const std::string& WebSocket::getUrl() const

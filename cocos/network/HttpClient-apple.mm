@@ -1,7 +1,8 @@
 /****************************************************************************
  Copyright (c) 2012      greathqy
  Copyright (c) 2012      cocos2d-x.org
- Copyright (c) 2013-2017 Chukong Technologies Inc.
+ Copyright (c) 2013-2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -23,10 +24,6 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  ****************************************************************************/
-
-#include "platform/CCPlatformConfig.h"
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_MAC) || (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-
 #include "network/HttpClient.h"
 
 #include <queue>
@@ -34,8 +31,8 @@
 
 #import "network/HttpAsynConnection-apple.h"
 #include "network/HttpCookie.h"
-#include "base/CCDirector.h"
 #include "platform/CCFileUtils.h"
+#include "platform/CCApplication.h"
 
 NS_CC_BEGIN
 
@@ -368,7 +365,7 @@ HttpClient::HttpClient()
 {
     CCLOG("In the constructor of HttpClient!");
     memset(_responseMessage, 0, sizeof(char) * RESPONSE_BUFFER_SIZE);
-    _scheduler = Director::getInstance()->getScheduler();
+    _scheduler = Application::getInstance()->getScheduler();
     increaseThreadCount();
 }
 
@@ -587,6 +584,3 @@ const std::string& HttpClient::getSSLVerification()
 }
 
 NS_CC_END
-
-#endif // #if CC_TARGET_PLATFORM == CC_PLATFORM_MAC
-

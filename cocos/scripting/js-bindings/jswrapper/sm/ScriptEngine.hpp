@@ -1,5 +1,6 @@
 /****************************************************************************
- Copyright (c) 2017 Chukong Technologies Inc.
+ Copyright (c) 2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -153,7 +154,7 @@ namespace se {
             , onGetFullPath(nullptr)
             {}
 
-            bool isValid() {
+            bool isValid() const {
                 return onGetDataFromFile != nullptr
                     && onGetStringFromFile != nullptr
                     && onCheckFileExist != nullptr
@@ -174,6 +175,12 @@ namespace se {
          *  @param delegate[in] The delegate instance for file operation.
          */
         void setFileOperationDelegate(const FileOperationDelegate& delegate);
+
+        /**
+         *  @brief Gets the delegate for file operation.
+         *  @return The delegate for file operation
+         */
+        const FileOperationDelegate& getFileOperationDelegate() const;
 
         /**
          *  @brief Executes a file which contains JavaScript code.
@@ -229,8 +236,9 @@ namespace se {
          *  @brief Enables JavaScript debugger
          *  @param[in] serverAddr The address of debugger server.
          *  @param[in] port The port of debugger server will use.
+         *  @param[in] isWait Whether wait debugger attach when loading.
          */
-        void enableDebugger(const std::string& serverAddr, uint32_t port);
+        void enableDebugger(const std::string& serverAddr, uint32_t port, bool isWait = false);
 
         /**
          *  @brief Tests whether JavaScript debugger is enabled

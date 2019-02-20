@@ -1,3 +1,28 @@
+/****************************************************************************
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+
+ http://www.cocos.com
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated engine source code (the "Software"), a limited,
+ worldwide, royalty-free, non-assignable, revocable and non-exclusive license
+ to use Cocos Creator solely to develop games on your target platforms. You shall
+ not use Cocos Creator software for developing other software or tools that's
+ used for developing games. You are not granted to publish, distribute,
+ sublicense, and/or sell copies of Cocos Creator.
+
+ The software or tools in this License Agreement are licensed, not sold.
+ Xiamen Yaji Software Co., Ltd. reserves all rights not expressly granted to you.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ ****************************************************************************/
+
 //
 //  jsb_spine_manual.cpp
 //  cocos2d_js_bindings
@@ -6,12 +31,20 @@
 //
 //
 
+#include "base/ccConfig.h"
 #include "jsb_spine_manual.hpp"
+
+#if USE_SPINE > 0
+
 #include "cocos/scripting/js-bindings/jswrapper/SeApi.h"
 #include "cocos/scripting/js-bindings/manual/jsb_conversions.hpp"
 #include "cocos/scripting/js-bindings/manual/jsb_global.h"
 #include "cocos/scripting/js-bindings/manual/jsb_helper.hpp"
 #include "cocos/scripting/js-bindings/auto/jsb_cocos2dx_spine_auto.hpp"
+
+#include "middleware-adapter.h"
+#include "spine-creator-support/SpineRenderer.h"
+#include "spine-creator-support/spine-cocos2dx.h"
 
 #include "cocos2d.h"
 #include "cocos/editor-support/spine/spine.h"
@@ -328,8 +361,78 @@ static bool js_register_spine_TrackEntry(se::Object* obj)
     return true;
 }
 
-bool register_all_spine_manual(se::Object* obj)
+static cocos2d::Map<std::string, middleware::Texture2D*>* _preloadedAtlasTextures = nullptr;
+static middleware::Texture2D* _getPreloadedAtlasTexture(const char* path)
 {
-    js_register_spine_TrackEntry(obj);
+    assert(_preloadedAtlasTextures);
+    auto it = _preloadedAtlasTextures->find(path);
+    return it != _preloadedAtlasTextures->end() ? it->second : nullptr;
+}
+
+static bool js_register_spine_initSkeletonRenderer(se::State& s)
+{
+    // renderer, jsonPath, atlasText, textures, scale
+    const auto& args = s.args();
+    int argc = (int)args.size();
+    if (argc != 5) {
+        SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", argc, 5);
+        return false;
+    }
+    bool ok = false;
+    
+    spine::SpineRenderer* node = nullptr;
+    ok = seval_to_native_ptr(args[0], &node);
+    SE_PRECONDITION2(ok, false, "js_creator_sp_initSkeletonRenderer: Converting 'sgNode' failed!");
+    
+    std::string jsonPath;
+    ok = seval_to_std_string(args[1], &jsonPath);
+    SE_PRECONDITION2(ok, false, "js_creator_sp_initSkeletonRenderer: Invalid json path!");
+    
+    std::string atlasText;
+    ok = seval_to_std_string(args[2], &atlasText);
+    SE_PRECONDITION2(ok, false, "js_creator_sp_initSkeletonRenderer: Invalid atlas content!");
+    
+    cocos2d::Map<std::string, middleware::Texture2D*> textures;
+    ok = seval_to_Map_string_key(args[3], &textures);
+    SE_PRECONDITION2(ok, false, "js_creator_sp_initSkeletonRenderer: Invalid textures!");
+    
+    float scale = 1.0f;
+    ok = seval_to_float(args[4], &scale);
+    SE_PRECONDITION2(ok, false, "js_creator_sp_initSkeletonRenderer: Invalid scale!");
+    
+    // create atlas from preloaded texture
+    
+    _preloadedAtlasTextures = &textures;
+    spine::spAtlasPage_setCustomTextureLoader(_getPreloadedAtlasTexture);
+    
+    spAtlas* atlas = spAtlas_create(atlasText.c_str(), (int)atlasText.size(), "", nullptr);
+    CCASSERT(atlas, "Error creating atlas.");
+    
+    _preloadedAtlasTextures = nullptr;
+    spine::spAtlasPage_setCustomTextureLoader(nullptr);
+    
+    // init node
+    node->initWithJsonFile(jsonPath, atlas, scale);
+    
     return true;
 }
+SE_BIND_FUNC(js_register_spine_initSkeletonRenderer)
+
+bool register_all_spine_manual(se::Object* obj)
+{
+    // Get the ns
+    se::Value nsVal;
+    if (!obj->getProperty("spine", &nsVal))
+    {
+        se::HandleObject jsobj(se::Object::createPlainObject());
+        nsVal.setObject(jsobj);
+        obj->setProperty("spine", nsVal);
+    }
+    se::Object* ns = nsVal.toObject();
+    
+    ns->defineFunction("_initSkeletonRenderer", _SE(js_register_spine_initSkeletonRenderer));
+    js_register_spine_TrackEntry(ns);
+    return true;
+}
+
+#endif

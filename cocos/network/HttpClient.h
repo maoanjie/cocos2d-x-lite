@@ -1,7 +1,8 @@
 /****************************************************************************
  Copyright (c) 2012      greathqy
  Copyright (c) 2012      cocos2d-x.org
- Copyright (c) 2013-2017 Chukong Technologies Inc.
+ Copyright (c) 2013-2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -30,10 +31,10 @@
 #include <thread>
 #include <condition_variable>
 #include "base/CCVector.h"
-#include "base/CCScheduler.h"
 #include "network/HttpRequest.h"
 #include "network/HttpResponse.h"
 #include "network/HttpCookie.h"
+#include "base/CCScheduler.h"
 
 /**
  * @addtogroup network

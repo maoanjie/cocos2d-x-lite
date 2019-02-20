@@ -1,5 +1,6 @@
 /****************************************************************************
- Copyright (c) 2017 Chukong Technologies Inc.
+ Copyright (c) 2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -81,7 +82,7 @@ namespace se {
             setter = JSObjectMakeFunctionWithCallback(__cx, nullptr, jsSetter);
         }
 
-        assert(getter != nullptr);
+        assert(getter != nullptr || setter != nullptr);
 
         if (getter != nullptr)
         {
@@ -341,7 +342,7 @@ namespace se {
         }
         else
         {
-            JSStringRef key = JSStringCreateWithUTF8CString(KEY_PRIVATE_DATA); //FIXME: cache the key string
+            JSStringRef key = JSStringCreateWithUTF8CString(KEY_PRIVATE_DATA); //IDEA: cache the key string
             if (JSObjectHasProperty(__cx, obj, key))
             {
                 JSValueRef exception = nullptr;

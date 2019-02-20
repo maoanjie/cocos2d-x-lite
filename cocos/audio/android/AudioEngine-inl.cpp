@@ -1,5 +1,6 @@
 /****************************************************************************
- Copyright (c) 2014-2017 Chukong Technologies Inc.
+ Copyright (c) 2014-2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -32,20 +33,18 @@
 #include <sys/types.h>
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
-
 #include <unordered_map>
-#include "platform/android/jni/JniHelper.h"
 #include <android/log.h>
-#include <jni.h>
+#include <thread>
+#include <mutex>
+
 #include "audio/include/AudioEngine.h"
-#include "base/CCDirector.h"
+#include "platform/CCApplication.h"
 #include "base/CCScheduler.h"
-#include "base/CCEventDispatcher.h"
-#include "base/CCEventType.h"
-#include "base/CCEventListenerCustom.h"
 #include "base/ccUTF8.h"
 #include "platform/android/CCFileUtils-android.h"
-#include "platform/android/jni/Java_org_cocos2dx_lib_Cocos2dxHelper.h"
+#include "platform/android/jni/JniImp.h"
+#include "platform/android/jni/JniHelper.h"
 
 #include "audio/android/IAudioPlayer.h"
 #include "audio/android/ICallerThreadUtils.h"
@@ -53,8 +52,10 @@
 #include "audio/android/cutils/log.h"
 #include "audio/android/UrlAudioPlayer.h"
 
+#include "scripting/js-bindings/event/EventDispatcher.h"
+#include "scripting/js-bindings/event/CustomEventTypes.h"
+
 using namespace cocos2d;
-using namespace cocos2d::experimental;
 
 // Audio focus values synchronized with which in cocos/platform/android/java/src/org/cocos2dx/lib/Cocos2dxActivity.java
 static const int AUDIOFOCUS_GAIN = 0;
@@ -70,7 +71,7 @@ class CallerThreadUtils : public ICallerThreadUtils
 public:
     virtual void performFunctionInCallerThread(const std::function<void()>& func)
     {
-        Director::getInstance()->getScheduler()->performFunctionInCocosThread(func);
+        Application::getInstance()->getScheduler()->performFunctionInCocosThread(func);
     };
 
     virtual std::thread::id getCallerThreadId()
@@ -118,8 +119,8 @@ AudioEngineImpl::AudioEngineImpl()
     , _engineEngine(nullptr)
     , _outputMixObject(nullptr)
     , _audioPlayerProvider(nullptr)
-    , _onPauseListener(nullptr)
-    , _onResumeListener(nullptr)
+    , _onPauseListenerID(0)
+    , _onResumeListenerID(0)
     , _audioIDIndex(0)
     , _lazyInitLoop(true)
 {
@@ -144,14 +145,14 @@ AudioEngineImpl::~AudioEngineImpl()
         (*_engineObject)->Destroy(_engineObject);
     }
 
-    if (_onPauseListener != nullptr)
+    if (_onPauseListenerID != 0)
     {
-        Director::getInstance()->getEventDispatcher()->removeEventListener(_onPauseListener);
+        EventDispatcher::removeCustomEventListener(EVENT_COME_TO_BACKGROUND, _onPauseListenerID);
     }
 
-    if (_onResumeListener != nullptr)
+    if (_onResumeListenerID != 0)
     {
-        Director::getInstance()->getEventDispatcher()->removeEventListener(_onResumeListener);
+        EventDispatcher::removeCustomEventListener(EVENT_COME_TO_FOREGROUND, _onResumeListenerID);
     }
 
     __impl = nullptr;
@@ -184,11 +185,11 @@ bool AudioEngineImpl::init()
         result = (*_outputMixObject)->Realize(_outputMixObject, SL_BOOLEAN_FALSE);
         if(SL_RESULT_SUCCESS != result){ ERRORLOG("realize the output mix fail"); break; }
 
-        _audioPlayerProvider = new AudioPlayerProvider(_engineEngine, _outputMixObject, getDeviceSampleRate(), getDeviceAudioBufferSizeInFrames(), fdGetter, &__callerThreadUtils);
+        _audioPlayerProvider = new AudioPlayerProvider(_engineEngine, _outputMixObject, getDeviceSampleRateJNI(), getDeviceAudioBufferSizeInFramesJNI(), fdGetter, &__callerThreadUtils);
 
-        _onPauseListener = Director::getInstance()->getEventDispatcher()->addCustomEventListener(EVENT_COME_TO_BACKGROUND, CC_CALLBACK_1(AudioEngineImpl::onEnterBackground, this));
+        _onPauseListenerID = EventDispatcher::addCustomEventListener(EVENT_COME_TO_BACKGROUND, CC_CALLBACK_1(AudioEngineImpl::onEnterBackground, this));
 
-        _onResumeListener = Director::getInstance()->getEventDispatcher()->addCustomEventListener(EVENT_COME_TO_FOREGROUND, CC_CALLBACK_1(AudioEngineImpl::onEnterForeground, this));
+        _onResumeListenerID = EventDispatcher::addCustomEventListener(EVENT_COME_TO_FOREGROUND, CC_CALLBACK_1(AudioEngineImpl::onEnterForeground, this));
 
         ret = true;
     }while (false);
@@ -196,7 +197,7 @@ bool AudioEngineImpl::init()
     return ret;
 }
 
-void AudioEngineImpl::onEnterBackground(EventCustom* event)
+void AudioEngineImpl::onEnterBackground(const CustomEvent& event)
 {
     // _audioPlayerProvider->pause() pauses AudioMixer and PcmAudioService,
     // but UrlAudioPlayers could not be paused.
@@ -218,7 +219,7 @@ void AudioEngineImpl::onEnterBackground(EventCustom* event)
     }
 }
 
-void AudioEngineImpl::onEnterForeground(EventCustom* event)
+void AudioEngineImpl::onEnterForeground(const CustomEvent& event)
 {
     // _audioPlayerProvider->resume() resumes AudioMixer and PcmAudioService,
     // but UrlAudioPlayers could not be resumed.

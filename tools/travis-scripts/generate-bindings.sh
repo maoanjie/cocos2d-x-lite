@@ -47,6 +47,23 @@ popd
 # 1. Generate js bindings
 generate_bindings_glue_codes
 
+if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
+  exit 0
+fi
+
+if [ -z "${GH_EMAIL}" ]; then
+  echo "GH_EMAIL not set"
+  exit 1
+fi
+if [ -z "${GH_USER}" ]; then
+  echo "GH_USER not set"
+  exit 1
+fi
+if [ -z "${GH_PASSWORD}" ]; then
+  echo "GH_USER not set"
+  exit 1
+fi
+
 echo
 echo Bindings generated successfully
 echo
@@ -101,7 +118,8 @@ git commit -m "$COMMITTAG"
 git remote add upstream "$COCOS_ROBOT_REMOTE" 2> /dev/null > /dev/null
 
 echo "Pushing to Robot's repo ..."
-git push -fq upstream "$COCOS_BRANCH" 2> /dev/null
+# git push -fq upstream "$COCOS_BRANCH" 2> /dev/null
+git push -fq upstream "$COCOS_BRANCH"
 
 # 7.
 echo "Sending Pull Request to base repo ..."

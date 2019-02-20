@@ -1,5 +1,6 @@
 /****************************************************************************
- Copyright (c) 2017 Chukong Technologies Inc.
+ Copyright (c) 2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -136,7 +137,14 @@ namespace se {
         bool isShared = false;
         JS::AutoCheckCannotGC nogc;
         uint8_t* tmpData = JS_GetArrayBufferData(jsobj, &isShared, nogc);
-        memcpy((void*)tmpData, (const void*)data, byteLength);
+        if (data)
+        {
+            memcpy((void*)tmpData, (const void*)data, byteLength);
+        }
+        else
+        {
+            memset((void*)tmpData, 0, byteLength);
+        }
         Object* obj = Object::_createJSObject(nullptr, jsobj);
         return obj;
     }
@@ -198,7 +206,12 @@ namespace se {
                 break;
         }
 
-        memcpy(tmpData, (const void*)data, byteLength);
+        //If data has content,then will copy data into buffer,or will only clear buffer.
+        if (data) {
+            memcpy(tmpData, (const void*)data, byteLength);
+        }else{
+            memset(tmpData, 0, byteLength);
+        }
 
         Object* obj = Object::_createJSObject(nullptr, arr);
         return obj;
@@ -307,7 +320,7 @@ namespace se {
     bool Object::defineFunction(const char *funcName, JSNative func)
     {
         JS::RootedObject object(__cx, _getJSObject());
-        bool ok = JS_DefineFunction(__cx, object, funcName, func, 0, 0);
+        bool ok = JS_DefineFunction(__cx, object, funcName, func, 0, JSPROP_ENUMERATE | JSPROP_PERMANENT);
         return ok;
     }
 
@@ -605,7 +618,7 @@ namespace se {
 
         JSObject* newPtr = _heap.unbarrieredGet();
 
-        // FIXME: test to see ggc
+        // IDEA: test to see ggc
         if (oldPtr != nullptr && newPtr != nullptr)
         {
             assert(oldPtr == newPtr);

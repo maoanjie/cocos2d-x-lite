@@ -1,5 +1,6 @@
 /****************************************************************************
- Copyright (c) 2017 Chukong Technologies Inc.
+ Copyright (c) 2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -219,6 +220,7 @@ namespace se {
 
         _globalObj = Object::_createJSObject(nullptr, globalObj);
         _globalObj->root();
+        _globalObj->setProperty("window", Value(_globalObj));
 
         // ChakraCore isn't shipped with a console variable. Make a fake one.
         Value consoleVal;
@@ -240,7 +242,7 @@ namespace se {
         _globalObj->defineFunction("log", __log);
         _globalObj->defineFunction("forceGC", __forceGC);
 
-        __jsb_CCPrivateData_class = Class::create("__CCPrivateData", _globalObj, nullptr, privateDataContructor);
+        __jsb_CCPrivateData_class = Class::create("__PrivateData", _globalObj, nullptr, privateDataContructor);
         __jsb_CCPrivateData_class->defineFinalizeFunction(privateDataFinalize);
         __jsb_CCPrivateData_class->install();
 
@@ -468,6 +470,7 @@ namespace se {
 
         if (errCode != JsNoError)
         {
+            SE_LOGE("ScriptEngine::evalString script %s, failed!\n", fileName);
             clearException();
             return false;
         }
@@ -494,6 +497,11 @@ namespace se {
         _fileOperationDelegate = delegate;
     }
 
+    const ScriptEngine::FileOperationDelegate& ScriptEngine::getFileOperationDelegate() const
+    {
+        return _fileOperationDelegate;
+    }
+
     bool ScriptEngine::runScript(const std::string& path, Value* ret/* = nullptr */)
     {
         assert(!path.empty());
@@ -510,20 +518,20 @@ namespace se {
         return false;
     }
 
-    void ScriptEngine::enableDebugger(const std::string& serverAddr, uint32_t port)
+    void ScriptEngine::enableDebugger(const std::string& serverAddr, uint32_t port, bool isWait)
     {
-        //FIXME:
+        //IDEA:
     }
 
     bool ScriptEngine::isDebuggerEnabled() const
     {
-        //FIXME:
+        //IDEA:
         return false;
     }
 
     void ScriptEngine::mainLoopUpdate()
     {
-        //FIXME:
+        //IDEA:
     }
 
 } // namespace se {

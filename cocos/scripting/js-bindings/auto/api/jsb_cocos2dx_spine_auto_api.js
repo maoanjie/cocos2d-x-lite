@@ -1,12 +1,12 @@
 /**
  * @module cocos2dx_spine
  */
-var sp = sp || {};
+var spine = spine || {};
 
 /**
- * @class SkeletonRenderer
+ * @class SpineRenderer
  */
-sp.Skeleton = {
+spine.Skeleton = {
 
 /**
  * @method setTimeScale
@@ -19,13 +19,13 @@ float
 },
 
 /**
- * @method getDebugSlotsEnabled
- * @return {bool}
+ * @method paused
+ * @param {bool} arg0
  */
-getDebugSlotsEnabled : function (
+paused : function (
+bool 
 )
 {
-    return false;
 },
 
 /**
@@ -51,6 +51,24 @@ setBonesToSetupPose : function (
 },
 
 /**
+ * @method setSlotsToSetupPose
+ */
+setSlotsToSetupPose : function (
+)
+{
+},
+
+/**
+ * @method isOpacityModifyRGB
+ * @return {bool}
+ */
+isOpacityModifyRGB : function (
+)
+{
+    return false;
+},
+
+/**
  * @method setDebugSlotsEnabled
  * @param {bool} arg0
  */
@@ -58,6 +76,16 @@ setDebugSlotsEnabled : function (
 bool 
 )
 {
+},
+
+/**
+ * @method getMaterialData
+ * @return {se::Object}
+ */
+getMaterialData : function (
+)
+{
+    return se::Object;
 },
 
 /**
@@ -75,9 +103,19 @@ float
 },
 
 /**
- * @method setSlotsToSetupPose
+ * @method setToSetupPose
  */
-setSlotsToSetupPose : function (
+setToSetupPose : function (
+)
+{
+},
+
+/**
+ * @method setOpacityModifyRGB
+ * @param {bool} arg0
+ */
+setOpacityModifyRGB : function (
+bool 
 )
 {
 },
@@ -97,27 +135,37 @@ float
 },
 
 /**
- * @method setToSetupPose
+ * @method onEnable
  */
-setToSetupPose : function (
+onEnable : function (
 )
 {
 },
 
 /**
- * @method getBlendFunc
- * @return {cc.BlendFunc}
+ * @method beginSchedule
  */
-getBlendFunc : function (
+beginSchedule : function (
 )
 {
-    return cc.BlendFunc;
 },
 
 /**
- * @method updateWorldTransform
+ * @method getDebugData
+ * @return {se::Object}
  */
-updateWorldTransform : function (
+getDebugData : function (
+)
+{
+    return se::Object;
+},
+
+/**
+ * @method update
+ * @param {float} arg0
+ */
+update : function (
+float 
 )
 {
 },
@@ -155,16 +203,6 @@ bool
 },
 
 /**
- * @method getDebugBonesEnabled
- * @return {bool}
- */
-getDebugBonesEnabled : function (
-)
-{
-    return false;
-},
-
-/**
  * @method getTimeScale
  * @return {float}
  */
@@ -175,11 +213,27 @@ getTimeScale : function (
 },
 
 /**
- * @method setBlendFunc
- * @param {cc.BlendFunc} arg0
+ * @method stopSchedule
  */
-setBlendFunc : function (
-blendfunc 
+stopSchedule : function (
+)
+{
+},
+
+/**
+ * @method onDisable
+ */
+onDisable : function (
+)
+{
+},
+
+/**
+ * @method setColor
+ * @param {color4b_object} arg0
+ */
+setColor : function (
+color4b 
 )
 {
 },
@@ -209,6 +263,14 @@ str
 },
 
 /**
+ * @method updateWorldTransform
+ */
+updateWorldTransform : function (
+)
+{
+},
+
+/**
  * @method getSkeleton
  * @return {spSkeleton}
  */
@@ -231,25 +293,11 @@ str
 },
 
 /**
- * @method drawDebug
- * @param {cc.Renderer} arg0
- * @param {mat4_object} arg1
- * @param {unsigned int} arg2
- */
-drawDebug : function (
-renderer, 
-mat4, 
-int 
-)
-{
-},
-
-/**
  * @method createWithFile
 * @param {String|String} str
 * @param {spAtlas|String} spatlas
 * @param {float|float} float
-* @return {sp.SkeletonRenderer|sp.SkeletonRenderer|sp.SkeletonRenderer}
+* @return {sp.SpineRenderer|sp.SpineRenderer|sp.SpineRenderer}
 */
 createWithFile : function(
 str,
@@ -257,17 +305,17 @@ str,
 float 
 )
 {
-    return sp.SkeletonRenderer;
+    return sp.SpineRenderer;
 },
 
 /**
- * @method SkeletonRenderer
+ * @method SpineRenderer
  * @constructor
 * @param {spSkeletonData|String|String} spskeletondata
 * @param {bool|spAtlas|String} bool
 * @param {float|float} float
 */
-SkeletonRenderer : function(
+SpineRenderer : function(
 str,
 str,
 float 
@@ -278,9 +326,9 @@ float
 };
 
 /**
- * @class SkeletonAnimation
+ * @class SpineAnimation
  */
-sp.SkeletonAnimation = {
+spine.SpineAnimation = {
 
 /**
  * @method setAnimation
@@ -453,7 +501,7 @@ func
 * @param {String|String} str
 * @param {String|spAtlas} str
 * @param {float|float} float
-* @return {sp.SkeletonAnimation|sp.SkeletonAnimation}
+* @return {sp.SpineAnimation|sp.SpineAnimation}
 */
 createWithBinaryFile : function(
 str,
@@ -461,17 +509,17 @@ spatlas,
 float 
 )
 {
-    return sp.SkeletonAnimation;
+    return sp.SpineAnimation;
 },
 
 /**
  * @method create
- * @return {sp.SkeletonAnimation}
+ * @return {sp.SpineAnimation}
  */
 create : function (
 )
 {
-    return sp.SkeletonAnimation;
+    return sp.SpineAnimation;
 },
 
 /**
@@ -479,7 +527,7 @@ create : function (
 * @param {String|String} str
 * @param {String|spAtlas} str
 * @param {float|float} float
-* @return {sp.SkeletonAnimation|sp.SkeletonAnimation}
+* @return {sp.SpineAnimation|sp.SpineAnimation}
 */
 createWithJsonFile : function(
 str,
@@ -487,17 +535,17 @@ spatlas,
 float 
 )
 {
-    return sp.SkeletonAnimation;
+    return sp.SpineAnimation;
 },
 
 /**
- * @method SkeletonAnimation
+ * @method SpineAnimation
  * @constructor
 * @param {spSkeletonData|String|String} spskeletondata
 * @param {bool|spAtlas|String} bool
 * @param {float|float} float
 */
-SkeletonAnimation : function(
+SpineAnimation : function(
 str,
 str,
 float 

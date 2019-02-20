@@ -1,5 +1,6 @@
 /****************************************************************************
- Copyright (c) 2014-2017 Chukong Technologies Inc.
+ Copyright (c) 2014-2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -37,12 +38,10 @@
 #else
 #include <OpenalSoft/al.h>
 #endif
-#include "platform/CCPlatformMacros.h"
+#include "base/ccMacros.h"
 #include "audio/win32/AudioMacros.h"
 
 NS_CC_BEGIN
-namespace experimental{
-
 class AudioEngineImpl;
 class AudioPlayer;
 
@@ -113,7 +112,6 @@ protected:
     friend class AudioPlayer;
 };
 
-}
 NS_CC_END
 
 #endif

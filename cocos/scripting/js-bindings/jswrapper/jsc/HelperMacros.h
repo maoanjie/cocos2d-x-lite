@@ -1,5 +1,6 @@
 /****************************************************************************
- Copyright (c) 2017 Chukong Technologies Inc.
+ Copyright (c) 2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -34,7 +35,7 @@
 #endif
 
 #define SAFE_INC_REF(obj) if (obj != nullptr) obj->incRef()
-#define SAFE_DEC_REF(obj) if (obj != nullptr) obj->decRef()
+#define SAFE_DEC_REF(obj) if ((obj) != nullptr) { (obj)->decRef(); (obj) = nullptr; }
 
 #define _SE(name) name##Registry
 
@@ -198,7 +199,7 @@
 #define SE_QUOTEME_(x) #x
 #define SE_QUOTEME(x) SE_QUOTEME_(x)
 
-//FIXME: implement this macro
+//IDEA: implement this macro
 #define SE_REPORT_ERROR(fmt, ...) SE_LOGE("[ERROR] (" __FILE__ ", " SE_QUOTEME(__LINE__) "): " fmt "\n", ##__VA_ARGS__)
 
 #if COCOS2D_DEBUG > 0

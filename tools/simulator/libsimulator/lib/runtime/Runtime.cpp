@@ -1,5 +1,7 @@
-﻿/****************************************************************************
+/****************************************************************************
 Copyright (c) 2013 cocos2d-x.org
+Copyright (c) 2013-2016 Chukong Technologies Inc.
+Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
 http://www.cocos2d-x.org
 
@@ -24,8 +26,6 @@ THE SOFTWARE.
 
 #include "Runtime.h"
 #include "FileServer.h"
-#include "ConnectWaitLayer.h"
-#include "ConsoleCommand.h"
 #include "cocos2d.h"
 #include "ConfigParser.h"
 #include "RuntimeProtocol.h"
@@ -103,7 +103,8 @@ void resetDesignResolution()
         if (size.width < size.height)
             std::swap(size.width, size.height);
     }
-    cocos2d::Director::getInstance()->getOpenGLView()->setDesignResolutionSize(size.width, size.height, ResolutionPolicy::EXACT_FIT);
+//    cocos2d::Director::getInstance()->getOpenGLView()->setDesignResolutionSize(size.width, size.height, ResolutionPolicy::EXACT_FIT);
+    CCLOG("resetDesignResolution request");
 }
 
 //
@@ -130,32 +131,15 @@ RuntimeEngine* RuntimeEngine::getInstance()
 
 void RuntimeEngine::setupRuntime()
 {
-    //
-    // 1. get project type fron config.json
-    // 2. init Lua / Js runtime
-    //
-
+    // get project type fron config.json
     updateConfigParser();
     auto entryFile = ConfigParser::getInstance()->getEntryFile();
 #if (CC_TARGET_PLATFORM != CC_PLATFORM_WIN32) && (CC_TARGET_PLATFORM != CC_PLATFORM_MAC)
     ConfigParser::getInstance()->readConfig();
     entryFile = ConfigParser::getInstance()->getEntryFile();
 #endif
-
-    // Lua
-    if ((entryFile.rfind(".lua") != std::string::npos) ||
-        (entryFile.rfind(".luac") != std::string::npos))
-    {
-        _launchEvent = "lua";
-        _runtime = _runtimes[kRuntimeEngineLua];
-    }
-    // Js
-    else if ((entryFile.rfind(".js") != std::string::npos) ||
-             (entryFile.rfind(".jsc") != std::string::npos))
-    {
-        _launchEvent = "js";
-        _runtime = _runtimes[kRuntimeEngineJs];
-    }
+    _launchEvent = "js";
+    _runtime = _runtimes[kRuntimeEngineJs];
 }
 
 void RuntimeEngine::setProjectConfig(const ProjectConfig &config)
@@ -232,6 +216,7 @@ void RuntimeEngine::startScript(const std::string &args)
 
 void RuntimeEngine::start()
 {
+
 #if (CC_TARGET_PLATFORM != CC_PLATFORM_WIN32) && (CC_TARGET_PLATFORM != CC_PLATFORM_MAC)
     _project.setDebuggerType(kCCRuntimeDebuggerCodeIDE);
 #endif
@@ -259,16 +244,9 @@ void RuntimeEngine::start()
         cocos2d::FileUtils::getInstance()->addSearchPath(path);
     }
 
-    //
-    // if (_project.getDebuggerType() == kCCRuntimeDebuggerNone)
-    // {
-        setupRuntime();
-        startScript("");
-    // }
-    // else
-    // {
-    //     startNetwork();
-    // }
+    setupRuntime();
+    startScript("jsb-adapter/jsb-builtin.js");
+    startScript("");
 }
 
 void RuntimeEngine::end()
@@ -282,10 +260,9 @@ void RuntimeEngine::end()
     {
         CC_SAFE_DELETE(it->second);
     }
-    ConsoleCommand::purge();
     FileServer::getShareInstance()->stop();
     ConfigParser::purge();
-//    FileServer::purge();
+    FileServer::purge();
 }
 
 void RuntimeEngine::setEventTrackingEnable(bool enable)
@@ -308,28 +285,6 @@ void RuntimeEngine::addRuntime(RuntimeProtocol *runtime, int type)
 RuntimeProtocol* RuntimeEngine::getRuntime()
 {
     return _runtime;
-}
-
-//
-// private
-//
-
-void RuntimeEngine::showUI()
-{
-    auto scene = cocos2d::Scene::create();
-    auto connectLayer = new ConnectWaitLayer();
-    connectLayer->autorelease();
-    auto director = cocos2d::Director::getInstance();
-    scene->addChild(connectLayer);
-    director->runWithScene(scene);
-}
-
-bool RuntimeEngine::startNetwork()
-{
-    ConsoleCommand::getShareInstance()->init();
-    showUI();
-
-    return true;
 }
 
 void RuntimeEngine::updateConfigParser()
@@ -366,7 +321,7 @@ void RuntimeEngine::trackEvent(const std::string &eventName)
 #else
     const char *platform = "UNKNOWN";
 #endif
-
+    /*
     char cidBuf[64] = {0};
     auto guid = player::DeviceEx::getInstance()->getUserGUID();
     snprintf(cidBuf, sizeof(cidBuf), "%x", XXH32(guid.c_str(), (int)guid.length(), 0));
@@ -385,7 +340,7 @@ void RuntimeEngine::trackEvent(const std::string &eventName)
     request->addPOSTValue("ea", eventName.c_str());
 
     request->start();
-
+    */
 #endif // ((CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) || (CC_TARGET_PLATFORM == CC_PLATFORM_MAC))
 }
 

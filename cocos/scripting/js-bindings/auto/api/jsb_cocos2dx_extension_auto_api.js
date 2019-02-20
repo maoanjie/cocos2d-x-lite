@@ -1,12 +1,12 @@
 /**
- * @module cocos2dx_extension
+ * @module extension
  */
-var cc = cc || {};
+var jsb = jsb || {};
 
 /**
  * @class EventAssetsManagerEx
  */
-cc.EventAssetsManager = {
+jsb.EventAssetsManager = {
 
 /**
  * @method getAssetsManagerEx
@@ -166,7 +166,7 @@ int
 /**
  * @class Manifest
  */
-cc.Manifest = {
+jsb.Manifest = {
 
 /**
  * @method getManifestRoot
@@ -308,7 +308,7 @@ str
 /**
  * @class AssetsManagerEx
  */
-cc.AssetsManager = {
+jsb.AssetsManager = {
 
 /**
  * @method getDownloadedFiles
@@ -404,6 +404,16 @@ getStoragePath : function (
  * @method update
  */
 update : function (
+)
+{
+},
+
+/**
+ * @method setEventCallback
+ * @param {function} arg0
+ */
+setEventCallback : function (
+func 
 )
 {
 },
@@ -523,50 +533,6 @@ AssetsManagerEx : function(
 str,
 str,
 func 
-)
-{
-},
-
-};
-
-/**
- * @class EventListenerAssetsManagerEx
- */
-cc.EventListenerAssetsManager = {
-
-/**
- * @method init
- * @param {cc.AssetsManagerEx} arg0
- * @param {function} arg1
- * @return {bool}
- */
-init : function (
-assetsmanagerex, 
-func 
-)
-{
-    return false;
-},
-
-/**
- * @method create
- * @param {cc.AssetsManagerEx} arg0
- * @param {function} arg1
- * @return {cc.EventListenerAssetsManagerEx}
- */
-create : function (
-assetsmanagerex, 
-func 
-)
-{
-    return cc.EventListenerAssetsManagerEx;
-},
-
-/**
- * @method EventListenerAssetsManagerEx
- * @constructor
- */
-EventListenerAssetsManagerEx : function (
 )
 {
 },

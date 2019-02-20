@@ -1,5 +1,6 @@
 /****************************************************************************
- Copyright (c) 2016-2017 Chukong Technologies Inc.
+ Copyright (c) 2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -29,7 +30,7 @@
 
 #define LOG_TAG "AudioDecoder"
 
-namespace cocos2d { namespace experimental {
+namespace cocos2d { 
 
     AudioDecoder::AudioDecoder()
     : _isOpened(false)
@@ -225,4 +226,4 @@ namespace cocos2d { namespace experimental {
         return _isOpened;
     }
 
-}} // namespace cocos2d { namespace experimental {
+} // namespace cocos2d { 

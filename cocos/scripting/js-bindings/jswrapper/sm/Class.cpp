@@ -1,5 +1,6 @@
 /****************************************************************************
- Copyright (c) 2017 Chukong Technologies Inc.
+ Copyright (c) 2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -112,7 +113,7 @@ namespace se {
         _jsCls.name = _name;
         if (_finalizeOp != nullptr)
         {
-            _jsCls.flags = JSCLASS_HAS_PRIVATE | JSCLASS_FOREGROUND_FINALIZE; //FIXME: Use JSCLASS_BACKGROUND_FINALIZE to improve GC performance
+            _jsCls.flags = JSCLASS_HAS_PRIVATE | JSCLASS_FOREGROUND_FINALIZE; //IDEA: Use JSCLASS_BACKGROUND_FINALIZE to improve GC performance
             _classOps.finalize = _finalizeOp;
         }
         else

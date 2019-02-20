@@ -1,5 +1,6 @@
 /****************************************************************************
- Copyright (c) 2014-2017 Chukong Technologies Inc.
+ Copyright (c) 2014-2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -30,6 +31,8 @@
 #include <SLES/OpenSLES_Android.h>
 #include <string>
 #include <unordered_map>
+#include <functional>
+
 #include "base/CCRef.h"
 #include "base/ccUtils.h"
 
@@ -39,10 +42,7 @@
 
 NS_CC_BEGIN
 
-class EventCustom;
-class EventListener;
-
-namespace experimental {
+struct CustomEvent;
 
 class IAudioPlayer;
 class AudioPlayerProvider;
@@ -75,8 +75,8 @@ public:
     void setAudioFocusForAllPlayers(bool isFocus);
 private:
 
-    void onEnterBackground(EventCustom* event);
-    void onEnterForeground(EventCustom* event);
+    void onEnterBackground(const CustomEvent&);
+    void onEnterForeground(const CustomEvent&);
 
     // engine interfaces
     SLObjectItf _engineObject;
@@ -93,8 +93,8 @@ private:
     std::unordered_map<int, IAudioPlayer*> _urlAudioPlayersNeedResume;
 
     AudioPlayerProvider* _audioPlayerProvider;
-    EventListener* _onPauseListener;
-    EventListener* _onResumeListener;
+    uint32_t _onPauseListenerID;
+    uint32_t _onResumeListenerID;
 
     int _audioIDIndex;
     
@@ -102,7 +102,6 @@ private:
 };
 
 #endif // __AUDIO_ENGINE_INL_H_
- }
 NS_CC_END
 
 #endif

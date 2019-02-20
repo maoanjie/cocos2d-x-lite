@@ -3,6 +3,7 @@ Copyright (c) 2008-2010 Ricardo Quesada
 Copyright (c) 2010-2012 cocos2d-x.org
 Copyright (c) 2011      Zynga Inc.
 Copyright (c) 2013-2016 Chukong Technologies Inc.
+Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
 http://www.cocos2d-x.org
 
@@ -34,6 +35,44 @@ THE SOFTWARE.
  * @file
  * cocos2d (cc) configuration file.
 */
+
+// disable module if you didn't need it, this will reduce package size
+
+#ifndef USE_GFX_RENDERER
+#define USE_GFX_RENDERER 0
+#endif
+
+#ifndef USE_VIDEO
+#define USE_VIDEO 1
+#endif
+
+#ifndef USE_WEB_VIEW
+#define USE_WEB_VIEW 1
+#endif
+
+#ifndef USE_AUDIO
+#define USE_AUDIO 1
+#endif
+
+#ifndef USE_NET_WORK
+#define USE_NET_WORK 1
+#endif
+
+#ifndef USE_MIDDLEWARE
+#define USE_MIDDLEWARE 1
+#endif
+
+#if USE_MIDDLEWARE > 0
+
+#ifndef USE_SPINE
+#define USE_SPINE 1
+#endif
+
+#ifndef USE_DRAGONBONES
+#define USE_DRAGONBONES 1
+#endif
+
+#endif //USE_MIDDLEWARE
 
 /** @def CC_ENABLE_STACKABLE_ACTIONS
  * If enabled, actions that alter the position property (eg: MoveBy, JumpBy, BezierBy, etc..) will be stacked.

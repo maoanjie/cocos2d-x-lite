@@ -1,5 +1,6 @@
 /****************************************************************************
-Copyright (c) 2015 Chukong Technologies Inc.
+Copyright (c) 2015-2016 Chukong Technologies Inc.
+Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
  
 http://www.cocos2d-x.org
 
@@ -27,9 +28,7 @@ import org.cocos2dx.lib.Cocos2dxActivity;
 import org.cocos2dx.lib.Cocos2dxGLSurfaceView;
 
 import android.os.Bundle;
-import org.cocos2dx.javascript.SDKWrapper;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 
@@ -47,17 +46,16 @@ public class AppActivity extends Cocos2dxActivity {
             return;
         }
         // DO OTHER INITIALIZATION BELOW
-        
         SDKWrapper.getInstance().init(this);
+
     }
-	
+    
     @Override
     public Cocos2dxGLSurfaceView onCreateView() {
         Cocos2dxGLSurfaceView glSurfaceView = new Cocos2dxGLSurfaceView(this);
         // TestCpp should create stencil buffer
         glSurfaceView.setEGLConfigChooser(5, 6, 5, 0, 16, 8);
-
-        SDKWrapper.getInstance().setGLSurfaceView(glSurfaceView);
+        SDKWrapper.getInstance().setGLSurfaceView(glSurfaceView, this);
 
         return glSurfaceView;
     }
@@ -66,18 +64,21 @@ public class AppActivity extends Cocos2dxActivity {
     protected void onResume() {
         super.onResume();
         SDKWrapper.getInstance().onResume();
+
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         SDKWrapper.getInstance().onPause();
+
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         SDKWrapper.getInstance().onDestroy();
+
     }
 
     @Override
