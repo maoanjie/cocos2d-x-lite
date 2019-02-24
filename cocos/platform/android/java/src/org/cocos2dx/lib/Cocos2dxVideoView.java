@@ -189,7 +189,7 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
         mVideoHeight = 0;
         getHolder().addCallback(mSHCallback);
         //Fix issue#11516:Can't play video on Android 2.3.x
-//        getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         setFocusable(true);
         setFocusableInTouchMode(true);
         mCurrentState = STATE_IDLE;
@@ -325,7 +325,7 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
 
             mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mMediaPlayer.setScreenOnWhilePlaying(true);
-            mMediaPlayer.setTimeoutInUs(15000000);
+//            mMediaPlayer.setTimeoutInUs(15000000);
 
             mMediaPlayer.prepareAsync();
 
@@ -662,7 +662,7 @@ IMediaPlayer.OnPreparedListener mPreparedListener = new IMediaPlayer.OnPreparedL
     public void pause() {
         if (isInPlaybackState()) {
             if (mMediaPlayer.isPlaying()) {
-                mSeekWhenPrepared = mMediaPlayer.getCurrentPosition();
+                mSeekWhenPrepared = (int)mMediaPlayer.getCurrentPosition();
                 mMediaPlayer.pause();
                 mCurrentState = STATE_PAUSED;
                 if (mOnVideoEventListener != null) {
