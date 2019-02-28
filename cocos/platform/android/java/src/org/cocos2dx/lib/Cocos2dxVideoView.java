@@ -194,9 +194,6 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
         setFocusableInTouchMode(true);
         mCurrentState = STATE_IDLE;
         mTargetState  = STATE_IDLE;
-
-//        BDCloudMediaPlayer.setAK("7da96283643247a082b632f525048a80");
-
     }
 
     @Override

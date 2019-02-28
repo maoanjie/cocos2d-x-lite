@@ -215,7 +215,6 @@ public class Cocos2dxVideoHelper {
         mLayout.addView(videoView, lParams);
 
         videoView.setZOrderOnTop(false);
-        videoView.setZOrderMediaOverlay(false);
 
         videoView.setOnCompletionListener(videoEventListener);
     }
