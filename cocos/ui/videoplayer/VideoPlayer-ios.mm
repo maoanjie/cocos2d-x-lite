@@ -158,8 +158,8 @@ USING_NS_CC;
     _width = width;
     _top = top;
     _height = height;
-    if (self.moviePlayer != nullptr) {
-        _restoreRect = self.moviePlayer.view.frame;
+    if (self.mediaPlayer != nullptr) {
+        _restoreRect = self.mediaPlayer.view.frame;
         
         if (_fullscreen)
             [self.mediaPlayer.view setFrame:[[UIScreen mainScreen] bounds]];
@@ -170,11 +170,11 @@ USING_NS_CC;
 
 -(void) setFullScreenEnabled:(BOOL) enabled
 {
-    if (self.moviePlayer != nullptr) {
+    if (self.mediaPlayer != nullptr) {
         if (enabled)
         {
             _fullscreen = enabled;
-            self.moviePlayer.scalingMode = MPMovieScalingModeFill;
+            self.mediaPlayer.scalingMode = BDCloudMediaPlayerScalingModeFill;
             [self.mediaPlayer.view setFrame:[[UIScreen mainScreen] bounds]];
         }
         else
@@ -252,11 +252,11 @@ USING_NS_CC;
         self.mediaPlayer.scalingMode = BDCloudMediaPlayerScalingModeFill;
     }
 
-    auto view = cocos2d::Director::getInstance()->getOpenGLView();
-    auto eaglview = (CCEAGLView *) view->getEAGLView();
+    auto eaglview = cocos2d::Application::getInstance()->getView();
+//    auto eaglview = (CCEAGLView *) view->getEAGLView();
 //    [eaglview addSubview:self.moviePlayer.view];
 //    [eaglview addSubview:self.mediaPlayer.view];
-    [[eaglview.superview viewWithTag:1] addSubview:self.mediaPlayer.view];
+    [[[eaglview superview] viewWithTag:10] addSubview:self.mediaPlayer.view];
 
 
 //    [[NSNotificationCenter defaultCenter] addObserver:self
@@ -502,7 +502,7 @@ USING_NS_CC;
     if (self.mediaPlayer != NULL) {
         if (_fullscreen)
         {
-            self.mediaPlayer.scalingMode = MPMovieScalingModeFill;
+            self.mediaPlayer.scalingMode = BDCloudMediaPlayerScalingModeFill;
             [self.mediaPlayer.view setFrame:[[UIScreen mainScreen] bounds]];
         }
         else
