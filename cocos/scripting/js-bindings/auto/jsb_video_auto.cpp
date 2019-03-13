@@ -62,6 +62,25 @@ static bool js_video_VideoPlayer_pause(se::State& s)
 }
 SE_BIND_FUNC(js_video_VideoPlayer_pause)
 
+static bool js_video_VideoPlayer_setZOrderOnTop(se::State& s)
+{
+    cocos2d::VideoPlayer* cobj = (cocos2d::VideoPlayer*)s.nativeThisObject();
+    SE_PRECONDITION2(cobj, false, "js_video_VideoPlayer_setZOrderOnTop : Invalid Native Object");
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 1) {
+        bool arg0;
+        ok &= seval_to_boolean(args[0], &arg0);
+        SE_PRECONDITION2(ok, false, "js_video_VideoPlayer_setZOrderOnTop : Error processing arguments");
+        cobj->setZOrderOnTop(arg0);
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
+    return false;
+}
+SE_BIND_FUNC(js_video_VideoPlayer_setZOrderOnTop)
+
 static bool js_video_VideoPlayer_setKeepAspectRatioEnabled(se::State& s)
 {
     cocos2d::VideoPlayer* cobj = (cocos2d::VideoPlayer*)s.nativeThisObject();
@@ -320,6 +339,7 @@ bool js_register_video_VideoPlayer(se::Object* obj)
     cls->defineFunction("setFrame", _SE(js_video_VideoPlayer_setFrame));
     cls->defineFunction("play", _SE(js_video_VideoPlayer_play));
     cls->defineFunction("pause", _SE(js_video_VideoPlayer_pause));
+    cls->defineFunction("setZOrderOnTop", _SE(js_video_VideoPlayer_setZOrderOnTop));
     cls->defineFunction("setKeepAspectRatioEnabled", _SE(js_video_VideoPlayer_setKeepAspectRatioEnabled));
     cls->defineFunction("currentTime", _SE(js_video_VideoPlayer_currentTime));
     cls->defineFunction("setFullScreenEnabled", _SE(js_video_VideoPlayer_setFullScreenEnabled));

@@ -228,4 +228,11 @@ float VideoPlayer::duration() const
     return JniHelper::callStaticFloatMethod(videoHelperClassName, "getDuration", _videoPlayerIndex);
 }
 
+// added by anjay
+void VideoPlayer::setZOrderOnTop(bool bTop)
+{
+    JniHelper::callStaticVoidMethod(videoHelperClassName, "setZOrderOnTop", _videoPlayerIndex, bTop);
+}
+// added by anjay
+
 #endif

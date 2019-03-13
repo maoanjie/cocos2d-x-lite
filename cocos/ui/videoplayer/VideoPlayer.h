@@ -151,6 +151,9 @@ class VideoPlayer : public Ref
      */
     virtual void setFrame(float x, float y, float width, float height);
     
+    // 调整播放器层级
+    virtual void setZOrderOnTop(bool bTop);
+    
   protected:
 
     virtual ~VideoPlayer();

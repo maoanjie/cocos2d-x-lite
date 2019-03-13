@@ -59,6 +59,10 @@ USING_NS_CC;
 - (void) setFullScreenEnabled:(BOOL) enabled;
 - (BOOL) isFullScreenEnabled;
 - (void) cleanup;
+// added by anjay
+// 调整视频播放组件层级
+- (void) setZOrderOnTop:(BOOL) top;
+// added end
 -(id) init:(void*) videoPlayer;
 
 -(void) videoFinished:(NSNotification*) notification;
@@ -179,6 +183,7 @@ USING_NS_CC;
         }
         else
         {
+            _fullscreen = enabled;
             [self setKeepRatioEnabled:_keepRatioEnabled];
             [self.mediaPlayer.view setFrame:_restoreRect];
         }
@@ -566,6 +571,31 @@ USING_NS_CC;
     }
 }
 
+// added by anjay
+// 调整视频播放组件层级
+- (void) setZOrderOnTop:(BOOL) top
+{
+    auto eaglview = cocos2d::Application::getInstance()->getView();
+    UIView* uiParentView = [eaglview superview];
+    UIView* uiView = [[eaglview superview] viewWithTag:10];
+    if (top) {
+        // 置顶
+        [uiParentView bringSubviewToFront:(uiView)];
+    }
+    else {
+        // 后置
+        [uiParentView sendSubviewToBack:(uiView)];
+    }
+//    UIWindow* uiWindow = eaglview.windows;
+    //    auto eaglview = (CCEAGLView *) view->getEAGLView();
+    //    [eaglview addSubview:self.moviePlayer.view];
+    //    [eaglview addSubview:self.mediaPlayer.view];
+//    [[ viewWithTag:10] addSubview:self.mediaPlayer.view];
+
+}
+// added end
+
+
 @end
 //------------------------------------------------------------------------------------------------------------
 
@@ -722,5 +752,19 @@ void VideoPlayer::setFrame(float x, float y, float width, float height)
                                                   :width/scaleFactor
                                                   :height/scaleFactor];
 }
+
+// 调整播放器层级
+void VideoPlayer::setZOrderOnTop(bool bTop)
+{
+    if (!bTop)
+    {
+        [((UIVideoViewWrapperIos*)_videoView) setZOrderOnTop:NO];
+    }
+    else
+    {
+        [((UIVideoViewWrapperIos*)_videoView) setZOrderOnTop:YES];
+    }
+}
+
 
 #endif

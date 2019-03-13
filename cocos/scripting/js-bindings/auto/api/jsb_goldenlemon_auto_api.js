@@ -65,9 +65,11 @@ getAppVersion : function (
 /**
  * @method savePhotoToAlbum
  * @param {String} arg0
+ * @param {function} arg1
  */
 savePhotoToAlbum : function (
-str 
+str, 
+func 
 )
 {
 },

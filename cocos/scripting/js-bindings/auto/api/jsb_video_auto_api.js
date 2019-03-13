@@ -41,6 +41,16 @@ pause : function (
 },
 
 /**
+ * @method setZOrderOnTop
+ * @param {bool} arg0
+ */
+setZOrderOnTop : function (
+bool 
+)
+{
+},
+
+/**
  * @method setKeepAspectRatioEnabled
  * @param {bool} arg0
  */

@@ -12,6 +12,7 @@ bool register_all_video(se::Object* obj);
 SE_DECLARE_FUNC(js_video_VideoPlayer_setFrame);
 SE_DECLARE_FUNC(js_video_VideoPlayer_play);
 SE_DECLARE_FUNC(js_video_VideoPlayer_pause);
+SE_DECLARE_FUNC(js_video_VideoPlayer_setZOrderOnTop);
 SE_DECLARE_FUNC(js_video_VideoPlayer_setKeepAspectRatioEnabled);
 SE_DECLARE_FUNC(js_video_VideoPlayer_currentTime);
 SE_DECLARE_FUNC(js_video_VideoPlayer_setFullScreenEnabled);

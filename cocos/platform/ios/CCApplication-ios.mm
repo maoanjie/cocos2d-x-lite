@@ -377,7 +377,7 @@ void Application::setMultitouch(bool value)
 
 void Application::onCreateView(PixelFormat& pixelformat, DepthFormat& depthFormat, int& multisamplingCount)
 {
-    pixelformat = PixelFormat::RGB565;
+    pixelformat = PixelFormat::RGBA8;
     depthFormat = DepthFormat::DEPTH24_STENCIL8;
 
     multisamplingCount = 0;

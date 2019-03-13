@@ -76,6 +76,10 @@ public class Cocos2dxVideoHelper {
     private final static int VideoTaskFullScreen = 12;
     private final static int VideoTaskSetVolume = 13;
 
+    // added by anjay
+    private final static int VideoTaskSetZOrderOnTop = 20;
+    // added end
+
     final static int KeyEventBack = 1000;
 
     static class VideoHandler extends Handler{
@@ -161,6 +165,15 @@ public class Cocos2dxVideoHelper {
             case VideoTaskSetVolume: {
                 float volume = (float) msg.arg2 / 10;
                 helper._setVolume(msg.arg1, volume);
+                break;
+            }
+            case VideoTaskSetZOrderOnTop: {
+                if (msg.arg2 == 1) {
+                    helper._setZOrderOnTop(msg.arg1, true);
+                }
+                else {
+                    helper._setZOrderOnTop(msg.arg1, false);
+                }
                 break;
             }
             default:
@@ -522,5 +535,26 @@ public class Cocos2dxVideoHelper {
         msg.arg2 = (int) (volume * 10);
         mVideoHandler.sendMessage(msg);
     }
+
+    // added by anjay
+    public static void setZOrderOnTop(final int index, final boolean bTop) {
+        Message msg = new Message();
+        msg.what = VideoTaskSetVolume;
+        msg.arg1 = index;
+        if (bTop) {
+            msg.arg2 = 1;
+        } else {
+            msg.arg2 = 0;
+        }
+        mVideoHandler.sendMessage(msg);
+    }
+
+    private void _setZOrderOnTop(int index, boolean bTop) {
+        Cocos2dxVideoView view = sVideoViews.get(index);
+        if (view != null) {
+            view.setZOrderOnTop(bTop);
+        }
+    }
+    // added end
 
 }
