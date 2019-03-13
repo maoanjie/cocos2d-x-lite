@@ -104,7 +104,7 @@ void VideoPlayer::setURL(const std::string& videoUrl)
                                     (int)_videoSource,_videoURL);
 }
 
-void VideoPlayer::VideoPlayer::setFrame(float x, float y, float width, float height)
+void VideoPlayer::setFrame(float x, float y, float width, float height)
 {
     JniHelper::callStaticVoidMethod(videoHelperClassName, "setVideoRect", _videoPlayerIndex,
                                     (int)x, (int)y, (int)width, (int)height);
