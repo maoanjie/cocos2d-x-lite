@@ -226,9 +226,7 @@ public class Cocos2dxVideoHelper {
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT);
         mLayout.addView(videoView, lParams);
-
-//        videoView.setZOrderOnTop(false);
-
+//        videoView.setZOrderOnTop(true);
         videoView.setOnCompletionListener(videoEventListener);
     }
 
@@ -539,7 +537,7 @@ public class Cocos2dxVideoHelper {
     // added by anjay
     public static void setZOrderOnTop(final int index, final boolean bTop) {
         Message msg = new Message();
-        msg.what = VideoTaskSetVolume;
+        msg.what = VideoTaskSetZOrderOnTop;
         msg.arg1 = index;
         if (bTop) {
             msg.arg2 = 1;
@@ -552,7 +550,9 @@ public class Cocos2dxVideoHelper {
     private void _setZOrderOnTop(int index, boolean bTop) {
         Cocos2dxVideoView view = sVideoViews.get(index);
         if (view != null) {
+            mLayout.removeView(view);
             view.setZOrderOnTop(bTop);
+            mLayout.addView(view);
         }
     }
     // added end

@@ -292,6 +292,7 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
 //                mMediaPlayer.setScreenOnWhilePlaying(true);
 
             mMediaPlayer = new BDCloudMediaPlayer(this.mCocos2dxActivity.getApplicationContext());
+//            mMediaPlayer = new BDCloudMediaPlayer(getContext());
 
 //            mMediaPlayer.setLogEnabled(true); // 打开播放器日志输出
 //            mMediaPlayer.setMaxProbeTime(4);
@@ -623,9 +624,18 @@ IMediaPlayer.OnPreparedListener mPreparedListener = new IMediaPlayer.OnPreparedL
                 mOnVideoEventListener.onVideoEvent(mViewTag, EVENT_PAUSED);
             }
 
-            release(true);
+//            release(true);
+            releaseWithoutStop();
         }
     };
+
+    private void releaseWithoutStop() {
+        if (mMediaPlayer != null) {
+                mMediaPlayer.setDisplay(null);
+        }
+
+    }
+
 
     /*
      * release the media player in any state
