@@ -1113,7 +1113,7 @@
 		BA21055F21009A5A00E19975 /* CCEventAssetsManagerEx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BA21054921008AC300E19975 /* CCEventAssetsManagerEx.cpp */; };
 		BAEA45551E279D5C00FA219F /* tinydir.h in Headers */ = {isa = PBXBuildFile; fileRef = BAEA45541E279D5C00FA219F /* tinydir.h */; };
 		BAEA45561E279D5C00FA219F /* tinydir.h in Headers */ = {isa = PBXBuildFile; fileRef = BAEA45541E279D5C00FA219F /* tinydir.h */; };
-		D4D9E7822230CC1C00A9A6FC /* libffmpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D4D9E7812230CC1B00A9A6FC /* libffmpeg.a */; };
+		D42029AE223A32B700FA319B /* libffmpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D4D9E7812230CC1B00A9A6FC /* libffmpeg.a */; };
 		ED30577D1BEC76C90083C3ED /* crypt.h in Headers */ = {isa = PBXBuildFile; fileRef = ED3057761BEC76C90083C3ED /* crypt.h */; };
 		ED30577E1BEC76C90083C3ED /* ioapi_mem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED3057771BEC76C90083C3ED /* ioapi_mem.cpp */; };
 		ED30577F1BEC76C90083C3ED /* ioapi_mem.h in Headers */ = {isa = PBXBuildFile; fileRef = ED3057781BEC76C90083C3ED /* ioapi_mem.h */; };
@@ -1831,7 +1831,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D4D9E7822230CC1C00A9A6FC /* libffmpeg.a in Frameworks */,
+				D42029AE223A32B700FA319B /* libffmpeg.a in Frameworks */,
 				EDE5DFF81C0D6B3F0014147A /* libwebsockets.a in Frameworks */,
 				1ACF6A3C1E4AFDC80033C137 /* libcrypto.a in Frameworks */,
 				1ACF6A3D1E4AFDC80033C137 /* libssl.a in Frameworks */,
@@ -4406,7 +4406,7 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				ENABLE_BITCODE = NO;
 				EXECUTABLE_PREFIX = "";
-				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../runtime-src/ios-common/SDK/BaiduCloudPlayer";
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../build/jsb-link/frameworks/runtime-src/ios-common/SDK/BaiduCloudPlayer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "../cocos/platform/ios/cocos2d-prefix.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
@@ -4434,7 +4434,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_BITCODE = NO;
 				EXECUTABLE_PREFIX = "";
-				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../runtime-src/ios-common/SDK/BaiduCloudPlayer";
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../build/jsb-link/frameworks/runtime-src/ios-common/SDK/BaiduCloudPlayer";
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "../cocos/platform/ios/cocos2d-prefix.pch";
