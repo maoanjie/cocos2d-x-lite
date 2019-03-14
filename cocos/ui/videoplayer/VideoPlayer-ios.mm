@@ -169,6 +169,7 @@ USING_NS_CC;
             [self.mediaPlayer.view setFrame:[[UIScreen mainScreen] bounds]];
         else
             [self.mediaPlayer.view setFrame:CGRectMake(left, top, width, height)];
+//            [[self.mediaPlayer.view superview] setFrame:CGRectMake(left, top, width, height)];
     }
 }
 
@@ -177,16 +178,28 @@ USING_NS_CC;
     if (self.mediaPlayer != nullptr) {
         if (enabled)
         {
-            _fullscreen = enabled;
+//            _fullscreen = enabled;
+            // 设置全屏，就强制后置视频
+            [self setZOrderOnTop:false];
             self.mediaPlayer.scalingMode = BDCloudMediaPlayerScalingModeFill;
+            CGRect rect = [[UIScreen mainScreen] bounds];
+            _left = rect.origin.x;
+            _width = rect.size.width;
+            _top = rect.origin.y;
+            _height = rect.size.height;
             [self.mediaPlayer.view setFrame:[[UIScreen mainScreen] bounds]];
         }
         else
         {
-            _fullscreen = enabled;
+//            _fullscreen = enabled;
             [self setKeepRatioEnabled:_keepRatioEnabled];
+            _left = _restoreRect.origin.x;
+            _width = _restoreRect.size.width;
+            _top = _restoreRect.origin.y;
+            _height = _restoreRect.size.height;
             [self.mediaPlayer.view setFrame:_restoreRect];
         }
+        _fullscreen = enabled;
     }
 }
 
@@ -580,6 +593,8 @@ USING_NS_CC;
     UIView* uiView = [[eaglview superview] viewWithTag:10];
     if (top) {
         // 置顶
+//        CGRect rect = CGRectMake(0, 0, 0, 0);
+//        [uiView setFrame:rect];
         [uiParentView bringSubviewToFront:(uiView)];
     }
     else {
