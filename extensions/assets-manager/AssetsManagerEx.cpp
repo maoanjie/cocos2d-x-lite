@@ -877,8 +877,8 @@ void AssetsManagerEx::prepareUpdate()
                 Manifest::AssetDiff diff = it->second;
                 if (diff.type == Manifest::DiffType::DELETED)
                 {
-                    std::string exsitedPath = _storagePath + diff.asset.path;
-                    _fileUtils->removeFile(exsitedPath);
+//                    std::string exsitedPath = _storagePath + diff.asset.path;
+//                    _fileUtils->removeFile(exsitedPath);
                 }
                 else
                 {
