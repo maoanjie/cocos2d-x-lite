@@ -625,8 +625,8 @@ IMediaPlayer.OnPreparedListener mPreparedListener = new IMediaPlayer.OnPreparedL
                 mOnVideoEventListener.onVideoEvent(mViewTag, EVENT_PAUSED);
             }
 
-//            release(true);
-            releaseWithoutStop();
+            release(true);
+//            releaseWithoutStop();
         }
     };
 
@@ -646,6 +646,7 @@ IMediaPlayer.OnPreparedListener mPreparedListener = new IMediaPlayer.OnPreparedL
             mMediaPlayer.reset();
             mMediaPlayer.release();
             mMediaPlayer = null;
+            mMetaUpdated = false;
             mCurrentState = STATE_IDLE;
             mMetaUpdated = false;
             if (cleartargetstate) {
