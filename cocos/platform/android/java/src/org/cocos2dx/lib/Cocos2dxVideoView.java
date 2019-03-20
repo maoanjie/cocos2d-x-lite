@@ -240,6 +240,7 @@ public class Cocos2dxVideoView extends SurfaceView implements MediaPlayerControl
         mSeekWhenPrepared = 0;
         mVideoWidth = 0;
         mVideoHeight = 0;
+        mMetaUpdated = false;
         openVideo();
         requestLayout();
         invalidate();
@@ -646,6 +647,7 @@ IMediaPlayer.OnPreparedListener mPreparedListener = new IMediaPlayer.OnPreparedL
             mMediaPlayer.release();
             mMediaPlayer = null;
             mCurrentState = STATE_IDLE;
+            mMetaUpdated = false;
             if (cleartargetstate) {
                 mTargetState  = STATE_IDLE;
             }
@@ -762,6 +764,7 @@ IMediaPlayer.OnPreparedListener mPreparedListener = new IMediaPlayer.OnPreparedL
     }
 
     public boolean isInPlaybackState() {
+        int nVisible = this.getVisibility();
         return (mMediaPlayer != null &&
                 mCurrentState != STATE_ERROR &&
                 mCurrentState != STATE_IDLE &&
