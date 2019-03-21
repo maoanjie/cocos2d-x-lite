@@ -436,6 +436,7 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
         Cocos2dxRenderer renderer = new Cocos2dxRenderer();
         this.mGLSurfaceView.setCocos2dxRenderer(renderer);
 
+        this.mGLSurfaceView.setZOrderOnTop(true);
         mFrameLayout.addView(this.mGLSurfaceView);
 
         return renderer;

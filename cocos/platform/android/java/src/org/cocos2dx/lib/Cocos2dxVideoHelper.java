@@ -26,6 +26,7 @@ THE SOFTWARE.
 package org.cocos2dx.lib;
 
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -226,7 +227,7 @@ public class Cocos2dxVideoHelper {
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT);
         mLayout.addView(videoView, lParams);
-//        videoView.setZOrderOnTop(true);
+        videoView.setZOrderOnTop(false);
         videoView.setOnCompletionListener(videoEventListener);
     }
 
