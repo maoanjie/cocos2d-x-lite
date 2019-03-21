@@ -105,26 +105,6 @@ Texture2D : function (
 middleware.MiddlewareManager = {
 
 /**
- * @method getGLVBID
- * @return {unsigned int}
- */
-getGLVBID : function (
-)
-{
-    return 0;
-},
-
-/**
- * @method removeTimer
- * @param {cc.middleware::IMiddleware} arg0
- */
-removeTimer : function (
-imiddleware 
-)
-{
-},
-
-/**
  * @method update
  * @param {float} arg0
  */
@@ -132,26 +112,6 @@ update : function (
 float 
 )
 {
-},
-
-/**
- * @method addTimer
- * @param {cc.middleware::IMiddleware} arg0
- */
-addTimer : function (
-imiddleware 
-)
-{
-},
-
-/**
- * @method getGLIBID
- * @return {unsigned int}
- */
-getGLIBID : function (
-)
-{
-    return 0;
 },
 
 /**
@@ -177,6 +137,60 @@ getInstance : function (
  * @constructor
  */
 MiddlewareManager : function (
+)
+{
+},
+
+};
+
+/**
+ * @class RenderInfoMgr
+ */
+middleware.RenderInfoMgr = {
+
+/**
+ * @method setResizeCallback
+ * @param {function} arg0
+ */
+setResizeCallback : function (
+func 
+)
+{
+},
+
+/**
+ * @method getRenderInfo
+ * @return {se::Object}
+ */
+getRenderInfo : function (
+)
+{
+    return se::Object;
+},
+
+/**
+ * @method destroyInstance
+ */
+destroyInstance : function (
+)
+{
+},
+
+/**
+ * @method getInstance
+ * @return {cc.middleware::RenderInfoMgr}
+ */
+getInstance : function (
+)
+{
+    return cc.middleware::RenderInfoMgr;
+},
+
+/**
+ * @method RenderInfoMgr
+ * @constructor
+ */
+RenderInfoMgr : function (
 )
 {
 },

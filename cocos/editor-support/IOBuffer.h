@@ -28,6 +28,7 @@
 #include <string>
 #include "MiddlewareMacro.h"
 #include <math.h>
+#include <functional>
 
 MIDDLEWARE_BEGIN
 /**
@@ -158,53 +159,110 @@ public:
         _readPos = 0;
     }
     
-    inline std::size_t length() const
+    inline void clear ()
+    {
+        memset(_buffer, 0, _bufferSize);
+    }
+    
+    inline void move (int pos)
+    {
+        if (_bufferSize < _curPos + pos)
+        {
+            _outRange = true;
+            return;
+        }
+        _curPos += pos;
+    }
+    
+    inline std::size_t length () const
     {
         return _curPos;
     }
 
-    inline std::size_t getCurPos() const
+    inline std::size_t getCurPos () const
     {
         return _curPos;
     }
 
-    inline uint8_t* getBuffer() const
+    inline uint8_t* getCurBuffer () const
+    {
+        return _buffer + _curPos;
+    }
+    
+    inline uint8_t* getBuffer () const
     {
         return _buffer;
     }
     
-    inline std::size_t getCapacity() const
+    inline std::size_t getCapacity () const
     {
         return _bufferSize;
     }
     
-    inline bool isOutRange()
+    inline bool isOutRange ()
     {
         return _outRange;
     }
+    
+    inline int checkSpace (std::size_t needSize, bool needCopy = false)
+    {
+        auto needLen = _curPos + needSize;
+        auto isFull = 0;
+        if (_maxSize > 0 && needLen > _maxSize)
+        {
+            isFull = 1;
+            if (_fullCallback)
+            {
+                _fullCallback();
+            }
+            _curPos = 0;
+        }
 
-	inline void checkSpace(std::size_t needSize, bool needCopy = false)
-	{
-		auto needLen = _curPos + needSize;
-		if (_bufferSize < needLen)
-		{
-			std::size_t fitSize = ceil(needLen / float(MIN_TYPE_ARRAY_SIZE)) * MIN_TYPE_ARRAY_SIZE;
-			resize(fitSize, needCopy);
-		}
-	}
+        if (_bufferSize < needLen)
+        {
+            std::size_t fitSize = ceil(needLen / float(MIN_TYPE_ARRAY_SIZE)) * MIN_TYPE_ARRAY_SIZE;
+            resize(fitSize, needCopy);
+            if (_resizeCallback)
+            {
+                _resizeCallback();
+            }
+        }
 
+        return isFull;
+    }
+
+    void setMaxSize(std::size_t maxSize)
+    {
+        _maxSize = maxSize;
+    }
+    
+    typedef std::function<void()> fullCallback;
+    void setFullCallback(fullCallback callback)
+    {
+        _fullCallback = callback;
+    }
+    
+    typedef std::function<void()> resizeCallback;
+    void setResizeCallback(resizeCallback callback)
+    {
+        _resizeCallback = callback;
+    }
+    
     /**
      * @brief Resize buffer
      * @param[in] newLen New size you want to adjustment.
      * @param[in] needCopy If true,will copy old data to new buffer,default false.
      */
-    virtual void resize(std::size_t newLen, bool needCopy = false);
+    virtual void resize (std::size_t newLen, bool needCopy = false);
 protected:
     uint8_t*                    _buffer = nullptr;
     std::size_t                 _bufferSize = 0;
     std::size_t                 _curPos = 0;
     std::size_t                 _readPos = 0;
     bool                        _outRange = false;
+    std::size_t                 _maxSize = 0;
+    fullCallback                _fullCallback = nullptr;
+    resizeCallback              _resizeCallback = nullptr;
 };
 
 MIDDLEWARE_END

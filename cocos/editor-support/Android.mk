@@ -10,6 +10,8 @@ LOCAL_ARM_MODE := arm
 LOCAL_SRC_FILES := \
 ../scripting/js-bindings/manual/jsb_helper.cpp \
 IOBuffer.cpp \
+RenderInfoMgr.cpp \
+MeshBuffer.cpp \
 middleware-adapter.cpp \
 TypedArrayPool.cpp \
 IOTypedArray.cpp \
@@ -21,6 +23,7 @@ LOCAL_SRC_FILES += \
 spine/Animation.c \
 spine/AnimationState.c \
 spine/AnimationStateData.c \
+spine/Array.c \
 spine/Atlas.c \
 spine/AtlasAttachmentLoader.c \
 spine/Attachment.c \
@@ -28,8 +31,11 @@ spine/AttachmentLoader.c \
 spine/Bone.c \
 spine/BoneData.c \
 spine/BoundingBoxAttachment.c \
+spine/ClippingAttachment.c \
+spine/Color.c \
 spine/Event.c \
 spine/EventData.c \
+spine/extension.c \
 spine/IkConstraint.c \
 spine/IkConstraintData.c \
 spine/Json.c \
@@ -37,10 +43,12 @@ spine/MeshAttachment.c \
 spine/PathAttachment.c \
 spine/PathConstraint.c \
 spine/PathConstraintData.c \
+spine/PointAttachment.c \
 spine/RegionAttachment.c \
 spine/Skeleton.c \
 spine/SkeletonBinary.c \
 spine/SkeletonBounds.c \
+spine/SkeletonClipping.c \
 spine/SkeletonData.c \
 spine/SkeletonJson.c \
 spine/Skin.c \
@@ -48,13 +56,15 @@ spine/Slot.c \
 spine/SlotData.c \
 spine/TransformConstraint.c \
 spine/TransformConstraintData.c \
+spine/Triangulator.c \
 spine/VertexAttachment.c \
-spine/extension.c \
+spine/VertexEffect.c \
 spine-creator-support/AttachmentVertices.cpp \
 spine-creator-support/CreatorAttachmentLoader.cpp \
 spine-creator-support/SpineAnimation.cpp \
 spine-creator-support/SpineRenderer.cpp \
 spine-creator-support/spine-cocos2dx.cpp \
+spine-creator-support/SkeletonDataMgr.cpp \
 ../scripting/js-bindings/manual/jsb_spine_manual.cpp \
 ../scripting/js-bindings/auto/jsb_cocos2dx_spine_auto.cpp
 endif # USE_SPINE
