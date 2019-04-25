@@ -33,10 +33,13 @@ import android.os.Message;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
-import org.cocos2dx.lib.Cocos2dxVideoView.OnVideoEventListener;
+//import org.cocos2dx.lib.Cocos2dxVideoView.OnVideoEventListener;
+import org.cocos2dx.lib.Cocos2dxTXVideoView.OnVideoEventListener;
+
 
 import java.lang.ref.WeakReference;
 import java.util.concurrent.Callable;
@@ -47,7 +50,7 @@ public class Cocos2dxVideoHelper {
 
     private RelativeLayout mLayout = null;
     private Cocos2dxActivity mActivity = null;  
-    private static SparseArray<Cocos2dxVideoView> sVideoViews = null;
+    private static SparseArray<Cocos2dxTXVideoView> sVideoViews = null;
     static VideoHandler mVideoHandler = null;
     private static Handler sHandler = null;
     
@@ -55,9 +58,16 @@ public class Cocos2dxVideoHelper {
     {
         mActivity = activity;
         mLayout = layout;
-        
+
+//        ViewGroup.LayoutParams frameLayoutParams =
+//                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+//                        ViewGroup.LayoutParams.MATCH_PARENT);
+//        mLayout = new RelativeLayout(activity.getApplicationContext());
+//        mLayout.setLayoutParams(frameLayoutParams);
+//        activity.addContentView(mLayout, frameLayoutParams);
+
         mVideoHandler = new VideoHandler(this);
-        sVideoViews = new SparseArray<Cocos2dxVideoView>();
+        sVideoViews = new SparseArray<Cocos2dxTXVideoView>();
         sHandler = new Handler(Looper.myLooper());
     }
 
@@ -221,7 +231,8 @@ public class Cocos2dxVideoHelper {
     }
 
     private void _createVideoView(int index) {
-        Cocos2dxVideoView videoView = new Cocos2dxVideoView(mActivity,index);
+//        Cocos2dxVideoView videoView = new Cocos2dxVideoView(mActivity, index);
+        Cocos2dxTXVideoView videoView = new Cocos2dxTXVideoView(mActivity,index);
         sVideoViews.put(index, videoView);
         FrameLayout.LayoutParams lParams = new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.WRAP_CONTENT,
@@ -239,7 +250,7 @@ public class Cocos2dxVideoHelper {
     }
 
     private void _removeVideoView(int index) {
-        Cocos2dxVideoView view = sVideoViews.get(index);
+        Cocos2dxTXVideoView view = sVideoViews.get(index);
         if (view != null) {
             view.stopPlayback();
             sVideoViews.remove(index);
@@ -257,7 +268,7 @@ public class Cocos2dxVideoHelper {
     }
 
     private void _setVideoURL(int index, int videoSource, String videoUrl) {
-        Cocos2dxVideoView videoView = sVideoViews.get(index);
+        Cocos2dxTXVideoView videoView = sVideoViews.get(index);
         if (videoView != null) {
             switch (videoSource) {
             case 0:
@@ -281,7 +292,7 @@ public class Cocos2dxVideoHelper {
     }
 
     private void _setVideoRect(int index, int left, int top, int maxWidth, int maxHeight) {
-        Cocos2dxVideoView videoView = sVideoViews.get(index);
+        Cocos2dxTXVideoView videoView = sVideoViews.get(index);
         if (videoView != null) {
             videoView.setVideoRect(left,top,maxWidth,maxHeight);
         }
@@ -300,7 +311,7 @@ public class Cocos2dxVideoHelper {
     }
 
     private void _setFullScreenEnabled(int index, boolean enabled) {
-        Cocos2dxVideoView videoView = sVideoViews.get(index);
+        Cocos2dxTXVideoView videoView = sVideoViews.get(index);
         if (videoView != null) {
             videoView.setFullScreenEnabled(enabled);
         }
@@ -310,7 +321,7 @@ public class Cocos2dxVideoHelper {
         int viewCount = sVideoViews.size();
         for (int i = 0; i < viewCount; i++) {
             int key = sVideoViews.keyAt(i);
-            Cocos2dxVideoView videoView = sVideoViews.get(key);
+            Cocos2dxTXVideoView videoView = sVideoViews.get(key);
             if (videoView != null) {
                 videoView.setFullScreenEnabled(false);
                 mActivity.runOnGLThread(new VideoEventRunnable(key, KeyEventBack));
@@ -326,7 +337,7 @@ public class Cocos2dxVideoHelper {
     }
 
     private void _startVideo(int index) {
-        Cocos2dxVideoView videoView = sVideoViews.get(index);
+        Cocos2dxTXVideoView videoView = sVideoViews.get(index);
         if (videoView != null) {
             videoView.start();
         }
@@ -340,7 +351,7 @@ public class Cocos2dxVideoHelper {
     }
 
     private void _pauseVideo(int index) {
-        Cocos2dxVideoView videoView = sVideoViews.get(index);
+        Cocos2dxTXVideoView videoView = sVideoViews.get(index);
         if (videoView != null) {
             videoView.pause();
         }
@@ -354,7 +365,7 @@ public class Cocos2dxVideoHelper {
     }
 
     private void _resumeVideo(int index) {
-        Cocos2dxVideoView videoView = sVideoViews.get(index);
+        Cocos2dxTXVideoView videoView = sVideoViews.get(index);
         if (videoView != null) {
             videoView.resume();
         }
@@ -368,7 +379,7 @@ public class Cocos2dxVideoHelper {
     }
 
     private void _stopVideo(int index) {
-        Cocos2dxVideoView videoView = sVideoViews.get(index);
+        Cocos2dxTXVideoView videoView = sVideoViews.get(index);
         if (videoView != null) {
             videoView.stop();
         }
@@ -382,7 +393,7 @@ public class Cocos2dxVideoHelper {
     }
 
     private void _restartVideo(int index) {
-        Cocos2dxVideoView videoView = sVideoViews.get(index);
+        Cocos2dxTXVideoView videoView = sVideoViews.get(index);
         if (videoView != null) {
             videoView.restart();
         }
@@ -397,7 +408,7 @@ public class Cocos2dxVideoHelper {
     }
 
     private void _seekVideoTo(int index,int msec) {
-        Cocos2dxVideoView videoView = sVideoViews.get(index);
+        Cocos2dxTXVideoView videoView = sVideoViews.get(index);
         if (videoView != null) {
             videoView.seekTo(msec);
         }
@@ -414,7 +425,7 @@ public class Cocos2dxVideoHelper {
         Callable<Float> callable = new Callable<Float>() {
             @Override
             public Float call() throws Exception {
-                Cocos2dxVideoView video = sVideoViews.get(index);
+                Cocos2dxTXVideoView video = sVideoViews.get(index);
                 float currentPosition = -1;
                 if (video != null) {
                     currentPosition = video.getCurrentPosition() / 1000.0f;
@@ -436,7 +447,7 @@ public class Cocos2dxVideoHelper {
         Callable<Float> callable = new Callable<Float>() {
             @Override
             public Float call() throws Exception {
-                Cocos2dxVideoView video = sVideoViews.get(index);
+                Cocos2dxTXVideoView video = sVideoViews.get(index);
                 float duration = -1;
                 if (video != null) {
                     duration = video.getDuration() / 1000.0f;
@@ -461,7 +472,7 @@ public class Cocos2dxVideoHelper {
         Callable<Boolean> callable = new Callable<Boolean>() {
             @Override
             public Boolean call() throws Exception {
-                Cocos2dxVideoView video = sVideoViews.get(index);
+                Cocos2dxTXVideoView video = sVideoViews.get(index);
                 return video != null && video.isPlaying();
             }
         };
@@ -490,7 +501,7 @@ public class Cocos2dxVideoHelper {
     }
 
     private void _setVideoVisible(int index, boolean visible) {
-        Cocos2dxVideoView videoView = sVideoViews.get(index);
+        Cocos2dxTXVideoView videoView = sVideoViews.get(index);
         if (videoView != null) {
             if (visible) {
                 videoView.fixSize();
@@ -514,14 +525,14 @@ public class Cocos2dxVideoHelper {
     }
 
     private void _setVideoKeepRatio(int index, boolean enable) {
-        Cocos2dxVideoView videoView = sVideoViews.get(index);
+        Cocos2dxTXVideoView videoView = sVideoViews.get(index);
         if (videoView != null) {
             videoView.setKeepRatio(enable);
         }
     }
 
     private void _setVolume(final int index, final float volume) {
-        Cocos2dxVideoView videoView = sVideoViews.get(index);
+        Cocos2dxTXVideoView videoView = sVideoViews.get(index);
         if (videoView != null) {
             videoView.setVolume(volume);
         }
@@ -549,7 +560,7 @@ public class Cocos2dxVideoHelper {
     }
 
     private void _setZOrderOnTop(int index, boolean bTop) {
-        Cocos2dxVideoView view = sVideoViews.get(index);
+        Cocos2dxTXVideoView view = sVideoViews.get(index);
         if (view != null) {
             mLayout.removeView(view);
             view.setZOrderOnTop(bTop);

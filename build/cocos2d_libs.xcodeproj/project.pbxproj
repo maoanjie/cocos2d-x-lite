@@ -1113,7 +1113,10 @@
 		BA21055F21009A5A00E19975 /* CCEventAssetsManagerEx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BA21054921008AC300E19975 /* CCEventAssetsManagerEx.cpp */; };
 		BAEA45551E279D5C00FA219F /* tinydir.h in Headers */ = {isa = PBXBuildFile; fileRef = BAEA45541E279D5C00FA219F /* tinydir.h */; };
 		BAEA45561E279D5C00FA219F /* tinydir.h in Headers */ = {isa = PBXBuildFile; fileRef = BAEA45541E279D5C00FA219F /* tinydir.h */; };
-		D42029AE223A32B700FA319B /* libffmpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D4D9E7812230CC1B00A9A6FC /* libffmpeg.a */; };
+		D41D818F227169AC00F06E46 /* BDVideoPlayer-ios.h in Headers */ = {isa = PBXBuildFile; fileRef = D41D818D227169AC00F06E46 /* BDVideoPlayer-ios.h */; };
+		D41D8190227169AC00F06E46 /* BDVideoPlayer-ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = D41D818E227169AC00F06E46 /* BDVideoPlayer-ios.mm */; };
+		D4F7B194226DA16900C54EAB /* TXVideoPlayer-ios.h in Headers */ = {isa = PBXBuildFile; fileRef = D4F7B192226DA16900C54EAB /* TXVideoPlayer-ios.h */; };
+		D4F7B197226DA53A00C54EAB /* TXVideoPlayer-ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = D4F7B196226DA53A00C54EAB /* TXVideoPlayer-ios.mm */; };
 		ED30577D1BEC76C90083C3ED /* crypt.h in Headers */ = {isa = PBXBuildFile; fileRef = ED3057761BEC76C90083C3ED /* crypt.h */; };
 		ED30577E1BEC76C90083C3ED /* ioapi_mem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED3057771BEC76C90083C3ED /* ioapi_mem.cpp */; };
 		ED30577F1BEC76C90083C3ED /* ioapi_mem.h in Headers */ = {isa = PBXBuildFile; fileRef = ED3057781BEC76C90083C3ED /* ioapi_mem.h */; };
@@ -1765,7 +1768,11 @@
 		BAEA45521E279D5C00FA219F /* COPYING */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = COPYING; sourceTree = "<group>"; };
 		BAEA45531E279D5C00FA219F /* package.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = package.json; sourceTree = "<group>"; };
 		BAEA45541E279D5C00FA219F /* tinydir.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tinydir.h; sourceTree = "<group>"; };
+		D41D818D227169AC00F06E46 /* BDVideoPlayer-ios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "BDVideoPlayer-ios.h"; sourceTree = "<group>"; };
+		D41D818E227169AC00F06E46 /* BDVideoPlayer-ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "BDVideoPlayer-ios.mm"; sourceTree = "<group>"; };
 		D4D9E7812230CC1B00A9A6FC /* libffmpeg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libffmpeg.a; path = ../external/ios/libs/libffmpeg.a; sourceTree = "<group>"; };
+		D4F7B192226DA16900C54EAB /* TXVideoPlayer-ios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "TXVideoPlayer-ios.h"; sourceTree = "<group>"; };
+		D4F7B196226DA53A00C54EAB /* TXVideoPlayer-ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "TXVideoPlayer-ios.mm"; sourceTree = "<group>"; };
 		ED3057761BEC76C90083C3ED /* crypt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = crypt.h; path = ../external/sources/unzip/crypt.h; sourceTree = "<group>"; };
 		ED3057771BEC76C90083C3ED /* ioapi_mem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ioapi_mem.cpp; path = ../external/sources/unzip/ioapi_mem.cpp; sourceTree = "<group>"; };
 		ED3057781BEC76C90083C3ED /* ioapi_mem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ioapi_mem.h; path = ../external/sources/unzip/ioapi_mem.h; sourceTree = "<group>"; };
@@ -1831,7 +1838,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D42029AE223A32B700FA319B /* libffmpeg.a in Frameworks */,
 				EDE5DFF81C0D6B3F0014147A /* libwebsockets.a in Frameworks */,
 				1ACF6A3C1E4AFDC80033C137 /* libcrypto.a in Frameworks */,
 				1ACF6A3D1E4AFDC80033C137 /* libssl.a in Frameworks */,
@@ -2430,6 +2436,10 @@
 		40FF7A9C216B29CB00E73029 /* videoplayer */ = {
 			isa = PBXGroup;
 			children = (
+				D41D818D227169AC00F06E46 /* BDVideoPlayer-ios.h */,
+				D41D818E227169AC00F06E46 /* BDVideoPlayer-ios.mm */,
+				D4F7B196226DA53A00C54EAB /* TXVideoPlayer-ios.mm */,
+				D4F7B192226DA16900C54EAB /* TXVideoPlayer-ios.h */,
 				40FF7A9E216B29CB00E73029 /* VideoPlayer-ios.mm */,
 				40FF7A9F216B29CB00E73029 /* VideoPlayer.h */,
 			);
@@ -3531,6 +3541,7 @@
 				1AAAC8F4205CB6E9005321B9 /* AudioEngine.h in Headers */,
 				046B68A921A292D300B33469 /* jsb_spine_manual.hpp in Headers */,
 				46FDDA78202ACC6A00931238 /* Light.h in Headers */,
+				D4F7B194226DA16900C54EAB /* TXVideoPlayer-ios.h in Headers */,
 				1A29D7A420566CAC00168D9A /* CCCanvasRenderingContext2D.h in Headers */,
 				04355881217EAE1B00B9C056 /* Skeleton.h in Headers */,
 				046E06812185B43B00B24E2D /* IEventDispatcher.h in Headers */,
@@ -3636,6 +3647,7 @@
 				1A52DB7E205BCDD000350EE3 /* Utils.hpp in Headers */,
 				503DD8F11926736A00CD74DD /* OpenGL_Internal-ios.h in Headers */,
 				1A28FF5A1F20AFAB007A1D9D /* NSRunLoop+SRWebSocketPrivate.h in Headers */,
+				D41D818F227169AC00F06E46 /* BDVideoPlayer-ios.h in Headers */,
 				1A28FF861F20AFAB007A1D9D /* SRSIMDHelpers.h in Headers */,
 				4617863820522469008256E1 /* HttpClient.h in Headers */,
 			);
@@ -3692,6 +3704,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 1551A334158F2AB200E66CFE;
@@ -4015,6 +4028,7 @@
 				4037F5CF2108751E001C205C /* CCAsyncTaskPool.cpp in Sources */,
 				ED30578C1BEC77510083C3ED /* ioapi.cpp in Sources */,
 				046E06362185B41100B24E2D /* TimelineState.cpp in Sources */,
+				D41D8190227169AC00F06E46 /* BDVideoPlayer-ios.mm in Sources */,
 				4617866C2052609B008256E1 /* jsb_cocos2dx_network_auto.cpp in Sources */,
 				046E06C02185B49F00B24E2D /* BoundingBoxData.cpp in Sources */,
 				043558AB217EAE1B00B9C056 /* IkConstraint.c in Sources */,
@@ -4065,6 +4079,7 @@
 				1AAAC8E4205CB6E9005321B9 /* AudioDecoder.mm in Sources */,
 				46FDDB90202ADDCE00931238 /* ccUtils.cpp in Sources */,
 				50ABC00E1926664800A911A9 /* CCFileUtils.cpp in Sources */,
+				D4F7B197226DA53A00C54EAB /* TXVideoPlayer-ios.mm in Sources */,
 				46FDDA94202ACC6A00931238 /* Technique.cpp in Sources */,
 				04355885217EAE1B00B9C056 /* PathAttachment.c in Sources */,
 				46FDDA72202ACC6A00931238 /* Scene.cpp in Sources */,
@@ -4406,7 +4421,10 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				ENABLE_BITCODE = NO;
 				EXECUTABLE_PREFIX = "";
-				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../build/jsb-link/frameworks/runtime-src/ios-common/SDK/BaiduCloudPlayer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SRCROOT)/../../build/jsb-link/frameworks/runtime-src/ios-common/SDK/BaiduCloudPlayer",
+					"$(SRCROOT)/../../build/jsb-link/frameworks/runtime-src/ios-common/SDK/TXPlayer",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "../cocos/platform/ios/cocos2d-prefix.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
@@ -4434,7 +4452,10 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_BITCODE = NO;
 				EXECUTABLE_PREFIX = "";
-				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../build/jsb-link/frameworks/runtime-src/ios-common/SDK/BaiduCloudPlayer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SRCROOT)/../../build/jsb-link/frameworks/runtime-src/ios-common/SDK/BaiduCloudPlayer",
+					"$(SRCROOT)/../../build/jsb-link/frameworks/runtime-src/ios-common/SDK/TXPlayer",
+				);
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "../cocos/platform/ios/cocos2d-prefix.pch";

@@ -38,6 +38,12 @@
 #endif
 #endif // OBJC_CLASS
 
+#define SYS_VIDEO_PLAYER 0
+#define TX_VIDEO_PLAYER 1
+#define BD_VIDEO_PLAYER 2
+
+#define PLAYER_TYPE TX_VIDEO_PLAYER
+
 NS_CC_BEGIN
 
 /**
@@ -62,7 +68,8 @@ class VideoPlayer : public Ref
         COMPLETED,
         META_LOADED,
         CLICKED,
-        READY_TO_PLAY
+        READY_TO_PLAY,
+        PLAYBEGIN
     };
 
     VideoPlayer();

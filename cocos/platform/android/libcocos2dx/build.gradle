@@ -9,6 +9,10 @@ android {
         targetSdkVersion PROP_TARGET_SDK_VERSION
         versionCode 1
         versionName "1.0"
+
+        ndk {
+            abiFilters PROP_APP_ABI
+        }
     }
 
     sourceSets.main {
@@ -30,5 +34,5 @@ android {
 }
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: '../java/libs')
+    implementation fileTree(include: ['*.jar', "*.aar"], dir: '../java/libs')
 }
