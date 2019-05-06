@@ -37,7 +37,9 @@ USING_NS_CC;
 -(id)init:(void*)videoPlayer
 {
     if (self = [super init]) {
-        self.txLivePlayer = nullptr;
+//        self.txLivePlayer = nullptr;
+        self.txLivePlayer = [[TXLivePlayer alloc] init];
+
         _videoPlayer = (VideoPlayer*)videoPlayer;
 //        _keepRatioEnabled = false;
         
@@ -51,6 +53,8 @@ USING_NS_CC;
 -(void) dealloc
 {
     [self cleanup];
+    [self.txLivePlayer removeVideoWidget];
+    self.txLivePlayer = nullptr;
     _videoPlayer = nullptr;
     [super dealloc];
 }
@@ -106,7 +110,7 @@ USING_NS_CC;
     
     _playUrl = [NSString stringWithString:@(videoUrl.c_str())];
     
-    self.txLivePlayer = [[TXLivePlayer alloc] init];
+//    self.txLivePlayer = [[TXLivePlayer alloc] init];
     
     TXLivePlayConfig*  _config = [[TXLivePlayConfig alloc] init];
     // 自动模式
@@ -149,11 +153,6 @@ USING_NS_CC;
         }
         
         auto eaglview = cocos2d::Application::getInstance()->getView();
-        //    auto eaglview = (CCEAGLView *) view->getEAGLView();
-        //    [eaglview addSubview:self.moviePlayer.view];
-        //    [eaglview addSubview:self.mediaPlayer.view];
-//        [eaglview superview] viewWithTag:10];
-        
         if (self.isLivePlay) {
             [self.txLivePlayer setupVideoWidget:CGRectMake(0, 0, 0, 0) containView:[[eaglview superview] viewWithTag:10] insertIndex:0];
         }
@@ -287,8 +286,8 @@ USING_NS_CC;
 //        [self removeRegisteredObservers];
         
         [self.txLivePlayer stopPlay];
-        [self.txLivePlayer removeVideoWidget];
-        self.txLivePlayer = nullptr;
+//        [self.txLivePlayer removeVideoWidget];
+//        self.txLivePlayer = nullptr;
     }
 }
 
