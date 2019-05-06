@@ -1,26 +1,32 @@
-/****************************************************************************
- Copyright (c) 2018 Xiamen Yaji Software Co., Ltd.
- 
- http://www.cocos2d-x.org
- 
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
- 
- The above copyright notice and this permission notice shall be included in
- all copies or substantial portions of the Software.
- 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- THE SOFTWARE.
- ****************************************************************************/
+/******************************************************************************
+ * Spine Runtimes Software License v2.5
+ *
+ * Copyright (c) 2013-2016, Esoteric Software
+ * All rights reserved.
+ *
+ * You are granted a perpetual, non-exclusive, non-sublicensable, and
+ * non-transferable license to use, install, execute, and perform the Spine
+ * Runtimes software and derivative works solely for personal or internal
+ * use. Without the written permission of Esoteric Software (see Section 2 of
+ * the Spine Software License Agreement), you may not (a) modify, translate,
+ * adapt, or develop new applications using the Spine Runtimes or otherwise
+ * create derivative works or improvements of the Spine Runtimes or (b) remove,
+ * delete, alter, or obscure any trademarks or any copyright, trademark, patent,
+ * or other intellectual property or proprietary rights notices on or in the
+ * Software, including any copy thereof. Redistributions in binary or source
+ * form must include this license and terms.
+ *
+ * THIS SOFTWARE IS PROVIDED BY ESOTERIC SOFTWARE "AS IS" AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+ * EVENT SHALL ESOTERIC SOFTWARE BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, BUSINESS INTERRUPTION, OR LOSS OF
+ * USE, DATA, OR PROFITS) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *****************************************************************************/
 
 #include "spine-creator-support/CreatorAttachmentLoader.h"
 #include "spine/extension.h"
@@ -33,36 +39,43 @@ using namespace spine;
 static unsigned short quadTriangles[6] = {0, 1, 2, 2, 3, 0};
 
 spAttachment* _CreatorAttachmentLoader_createAttachment (spAttachmentLoader* loader, spSkin* skin, spAttachmentType type,
-                                                         const char* name, const char* path) {
+                                                         const char* name, const char* path)
+{
     CreatorAttachmentLoader* self = SUB_CAST(CreatorAttachmentLoader, loader);
     return spAttachmentLoader_createAttachment(SUPER(self->atlasAttachmentLoader), skin, type, name, path);
 }
 
-void _CreatorAttachmentLoader_configureAttachment (spAttachmentLoader* loader, spAttachment* attachment) {
+void _CreatorAttachmentLoader_configureAttachment (spAttachmentLoader* loader, spAttachment* attachment)
+{
     attachment->attachmentLoader = loader;
     
-    switch (attachment->type) {
-        case SP_ATTACHMENT_REGION: {
+    switch (attachment->type)
+    {
+        case SP_ATTACHMENT_REGION:
+        {
             spRegionAttachment* regionAttachment = SUB_CAST(spRegionAttachment, attachment);
             spAtlasRegion* region = (spAtlasRegion*)regionAttachment->rendererObject;
             AttachmentVertices* attachmentVertices = new AttachmentVertices((Texture2D*)region->page->rendererObject, 4, quadTriangles, 6);
             V2F_T2F_C4B* vertices = attachmentVertices->_triangles->verts;
-            for (int i = 0, ii = 0; i < 4; ++i, ii += 2) {
-                vertices[i].texCoords.u = regionAttachment->uvs[ii];
-                vertices[i].texCoords.v = regionAttachment->uvs[ii + 1];
+            for (int i = 0, ii = 0; i < 4; ++i, ii += 2)
+            {
+                vertices[i].texCoord.u = regionAttachment->uvs[ii];
+                vertices[i].texCoord.v = regionAttachment->uvs[ii + 1];
             }
             regionAttachment->rendererObject = attachmentVertices;
             break;
         }
-        case SP_ATTACHMENT_MESH: {
+        case SP_ATTACHMENT_MESH:
+        {
             spMeshAttachment* meshAttachment = SUB_CAST(spMeshAttachment, attachment);
             spAtlasRegion* region = (spAtlasRegion*)meshAttachment->rendererObject;
             AttachmentVertices* attachmentVertices = new AttachmentVertices((Texture2D*)region->page->rendererObject,
                                                                             meshAttachment->super.worldVerticesLength >> 1, meshAttachment->triangles, meshAttachment->trianglesCount);
             V2F_T2F_C4B* vertices = attachmentVertices->_triangles->verts;
-            for (int i = 0, ii = 0, nn = meshAttachment->super.worldVerticesLength; ii < nn; ++i, ii += 2) {
-                vertices[i].texCoords.u = meshAttachment->uvs[ii];
-                vertices[i].texCoords.v = meshAttachment->uvs[ii + 1];
+            for (int i = 0, ii = 0, nn = meshAttachment->super.worldVerticesLength; ii < nn; ++i, ii += 2)
+            {
+                vertices[i].texCoord.u = meshAttachment->uvs[ii];
+                vertices[i].texCoord.v = meshAttachment->uvs[ii + 1];
             }
             meshAttachment->rendererObject = attachmentVertices;
             break;
@@ -71,14 +84,18 @@ void _CreatorAttachmentLoader_configureAttachment (spAttachmentLoader* loader, s
     }
 }
 
-void _CreatorAttachmentLoader_disposeAttachment (spAttachmentLoader* loader, spAttachment* attachment) {
-    switch (attachment->type) {
-        case SP_ATTACHMENT_REGION: {
+void _CreatorAttachmentLoader_disposeAttachment (spAttachmentLoader* loader, spAttachment* attachment)
+{
+    switch (attachment->type)
+    {
+        case SP_ATTACHMENT_REGION:
+        {
             spRegionAttachment* regionAttachment = SUB_CAST(spRegionAttachment, attachment);
             delete (AttachmentVertices*)regionAttachment->rendererObject;
             break;
         }
-        case SP_ATTACHMENT_MESH: {
+        case SP_ATTACHMENT_MESH:
+        {
             spMeshAttachment* meshAttachment = SUB_CAST(spMeshAttachment, attachment);
             delete (AttachmentVertices*)meshAttachment->rendererObject;
             break;
@@ -87,13 +104,15 @@ void _CreatorAttachmentLoader_disposeAttachment (spAttachmentLoader* loader, spA
     }
 }
 
-void _CreatorAttachmentLoader_dispose (spAttachmentLoader* loader) {
+void _CreatorAttachmentLoader_dispose (spAttachmentLoader* loader)
+{
     CreatorAttachmentLoader* self = SUB_CAST(CreatorAttachmentLoader, loader);
     spAttachmentLoader_dispose(SUPER_CAST(spAttachmentLoader, self->atlasAttachmentLoader));
     _spAttachmentLoader_deinit(loader);
 }
 
-CreatorAttachmentLoader* CreatorAttachmentLoader_create (spAtlas* atlas) {
+CreatorAttachmentLoader* CreatorAttachmentLoader_create (spAtlas* atlas)
+{
     CreatorAttachmentLoader* self = NEW(CreatorAttachmentLoader);
     _spAttachmentLoader_init(SUPER(self), _CreatorAttachmentLoader_dispose, _CreatorAttachmentLoader_createAttachment,
                              _CreatorAttachmentLoader_configureAttachment, _CreatorAttachmentLoader_disposeAttachment);

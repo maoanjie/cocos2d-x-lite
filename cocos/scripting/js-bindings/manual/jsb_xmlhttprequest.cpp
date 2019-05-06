@@ -32,7 +32,7 @@
 //
 #include "base/ccConfig.h"
 #include "jsb_xmlhttprequest.hpp"
-#if (USE_NET_WORK > 0) && (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC || CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC || CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
 #include <unordered_map>
 #include <string>
 #include <functional>
@@ -46,6 +46,74 @@
 
 using namespace cocos2d;
 using namespace cocos2d::network;
+
+namespace
+{
+std::unordered_map<int, std::string> _httpStatusCodeMap = {
+    {100, "Continue"},
+    {101, "Switching Protocols"},
+    {102, "Processing"},
+    {200, "OK"},
+    {201, "Created"},
+    {202, "Accepted"},
+    {203, "Non-authoritative Information"},
+    {204, "No Content"},
+    {205, "Reset Content"},
+    {206, "Partial Content"},
+    {207, "Multi-Status"},
+    {208, "Already Reported"},
+    {226, "IM Used"},
+    {300, "Multiple Choices"},
+    {301, "Moved Permanently"},
+    {302, "Found"},
+    {303, "See Other"},
+    {304, "Not Modified"},
+    {305, "Use Proxy"},
+    {307, "Temporary Redirect"},
+    {308, "Permanent Redirect"},
+    {400, "Bad Request"},
+    {401, "Unauthorized"},
+    {402, "Payment Required"},
+    {403, "Forbidden"},
+    {404, "Not Found"},
+    {405, "Method Not Allowed"},
+    {406, "Not Acceptable"},
+    {407, "Proxy Authentication Required"},
+    {408, "Request Timeout"},
+    {409, "Conflict"},
+    {410, "Gone"},
+    {411, "Length Required"},
+    {412, "Precondition Failed"},
+    {413, "Payload Too Large"},
+    {414, "Request-URI Too Long"},
+    {415, "Unsupported Media Type"},
+    {416, "Requested Range Not Satisfiable"},
+    {417, "Expectation Failed"},
+    {418, "I'm a teapot"},
+    {421, "Misdirected Request"},
+    {422, "Unprocessable Entity"},
+    {423, "Locked"},
+    {424, "Failed Dependency"},
+    {426, "Upgrade Required"},
+    {428, "Precondition Required"},
+    {429, "Too Many Requests"},
+    {431, "Request Header Fields Too Large"},
+    {444, "Connection Closed Without Response"},
+    {451, "Unavailable For Legal Reasons"},
+    {499, "Client Closed Request"},
+    {500, "Internal Server Error"},
+    {501, "Not Implemented"},
+    {502, "Bad Gateway"},
+    {503, "Service Unavailable"},
+    {504, "Gateway Timeout"},
+    {505, "HTTP Version Not Supported"},
+    {506, "Variant Also Negotiates"},
+    {507, "Insufficient Storage"},
+    {508, "Loop Detected"},
+    {510, "Not Extended"},
+    {511, "Network Authentication Required"},
+    {599, "Network Connect Timeout Error"}};
+}
 
 class XMLHttpRequest : public Ref
 {
@@ -173,7 +241,8 @@ XMLHttpRequest::XMLHttpRequest()
 XMLHttpRequest::~XMLHttpRequest()
 {
     Application::getInstance()->getScheduler()->unscheduleAllForTarget(this);
-
+    // Avoid HttpClient response call a released object!
+    _httpRequest->setResponseCallback(nullptr);
     CC_SAFE_RELEASE(_httpRequest);
 }
 
@@ -306,43 +375,25 @@ void XMLHttpRequest::getHeader(const std::string& header)
     {
         // Get Header and Set StatusText
         // Split String into Tokens
-        char* cstr = new (std::nothrow) char [header.length()+1];
-
-        // Seems like we have the response Code! Parse it and check for it.
-        char* pch;
-        strncpy(cstr, header.c_str(), header.length());
-        cstr[header.length()] = '\0';
-
-        pch = strtok(cstr, " ");
-        while (pch != nullptr)
+        if (header.find("HTTP") == 0)
         {
-            std::stringstream ss;
-            std::string val;
-
-            ss << pch;
-            val = ss.str();
-            size_t found_http = val.find("HTTP");
-
-            // Check for HTTP Header to set statusText
-            if (found_http != std::string::npos) {
-
-                std::stringstream mystream;
-
-                // Get Response Status
-                pch = strtok (nullptr, " ");
-                //mystream << pch;    //ignore HTTP statusCode 
-
-                pch = strtok (nullptr, " ");
-                mystream << pch;
-
-                _statusText = mystream.str();
-                
+            int _v1, _v2, code = 0;
+            char statusText[64] = {0};
+            sscanf(header.c_str(), "HTTP/%d.%d %d %64[^\n]", &_v1, &_v2, &code, statusText);
+            _statusText = statusText;
+            if(_statusText.empty())
+            {
+                auto itCode = _httpStatusCodeMap.find(code);
+                if(itCode != _httpStatusCodeMap.end())
+                {
+                    _statusText = itCode->second;
+                }
+                else 
+                {
+                    CCLOG("XMLHTTPRequest invalid response code %d", code);
+                }
             }
-            
-            pch = strtok (nullptr, " ");
         }
-
-        CC_SAFE_DELETE_ARRAY(cstr);
     }
 }
 
@@ -1071,4 +1122,4 @@ bool register_all_xmlhttprequest(se::Object* global)
 
     return true;
 }
-#endif //#if (USE_NET_WORK > 0) && (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC || CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
+#endif //#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC || CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
