@@ -92,7 +92,7 @@ public class Cocos2dxTXVideoView extends SurfaceView implements ITXLivePlayListe
 //    private BDCloudMediaPlayer mMediaPlayer = null;
 
     private TXLivePlayer mLivePlayer = null;
-    private TXCloudVideoView mPlayerView = null;
+//    private TXCloudVideoView mPlayerView = null;
     private int              mPlayType = TXLivePlayer.PLAY_TYPE_LIVE_RTMP;
 
     public static final int ACTIVITY_TYPE_PUBLISH      = 1;
@@ -225,9 +225,9 @@ public class Cocos2dxTXVideoView extends SurfaceView implements ITXLivePlayListe
         mCurrentState = STATE_IDLE;
         mTargetState  = STATE_IDLE;
 
-        mLivePlayer = new TXLivePlayer(this.mCocos2dxActivity);
         mCurrentRenderMode = TXLiveConstants.RENDER_MODE_ADJUST_RESOLUTION;
-        mLivePlayer.setPlayListener(this);
+//        mLivePlayer = new TXLivePlayer(this.mCocos2dxActivity);
+//        mLivePlayer.setPlayListener(this);
 
     }
 
@@ -288,7 +288,7 @@ public class Cocos2dxTXVideoView extends SurfaceView implements ITXLivePlayListe
 //            mMediaPlayer = null;
             mLivePlayer.stopPlay(true);
             mLivePlayer = null;
-            mPlayerView.onDestroy();
+//            mPlayerView.onDestroy();
             mCurrentState = STATE_IDLE;
             mTargetState  = STATE_IDLE;
         }
@@ -296,7 +296,7 @@ public class Cocos2dxTXVideoView extends SurfaceView implements ITXLivePlayListe
 
 //    @Override
     public void onDestroy() {
-        mPlayerView.onDestroy();
+//        mPlayerView.onDestroy();
 
     }
 
@@ -324,7 +324,11 @@ public class Cocos2dxTXVideoView extends SurfaceView implements ITXLivePlayListe
 
         try {
 
+            mLivePlayer = new TXLivePlayer(this.mCocos2dxActivity);
+            mLivePlayer.setPlayListener(this);
             mLivePlayer.setSurface(mSurfaceHolder.getSurface());
+            this.mLivePlayer.setSurfaceSize(mVisibleWidth, mVisibleHeight);
+
 
             if (!checkPlayUrl(mVideoUri.toString())) {
                 return;
@@ -346,9 +350,9 @@ public class Cocos2dxTXVideoView extends SurfaceView implements ITXLivePlayListe
              * Don't set the target state here either, but preserve the target state that was there before.
              */
             mCurrentState = STATE_PREPARED;
-            if (mTargetState == STATE_PLAYING) {
-                start();
-            }
+//            if (mTargetState == STATE_PLAYING) {
+//                start();
+//            }
         } catch (IOException ex) {
             Log.w(TAG, "Unable to open content: " + mVideoUri, ex);
             mCurrentState = STATE_ERROR;
@@ -417,8 +421,12 @@ public class Cocos2dxTXVideoView extends SurfaceView implements ITXLivePlayListe
         }
 
         getHolder().setFixedSize(mVisibleWidth, mVisibleHeight);
+        mVideoWidth = mVisibleWidth;
+        mVideoHeight = mVisibleHeight;
 
-        this.mLivePlayer.setSurfaceSize(mVisibleWidth, mVisibleHeight);
+        if (this.mLivePlayer != null) {
+            this.mLivePlayer.setSurfaceSize(mVisibleWidth, mVisibleHeight);
+        }
 
         RelativeLayout.LayoutParams lParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
                 RelativeLayout.LayoutParams.MATCH_PARENT);
@@ -645,11 +653,13 @@ public class Cocos2dxTXVideoView extends SurfaceView implements ITXLivePlayListe
             // after we return from this we can't use the surface any more
             mSurfaceHolder = null;
 
+            //            release(true);
+
+
 //            if (mOnVideoEventListener != null && mCurrentState == STATE_PLAYING) {
 //                mOnVideoEventListener.onVideoEvent(mViewTag, EVENT_PAUSED);
 //            }
 
-            release(true);
         }
     };
 
