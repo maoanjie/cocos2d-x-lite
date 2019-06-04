@@ -653,7 +653,7 @@ public class Cocos2dxTXVideoView extends SurfaceView implements ITXLivePlayListe
             // after we return from this we can't use the surface any more
             mSurfaceHolder = null;
 
-            //            release(true);
+            release(true);
 
 
 //            if (mOnVideoEventListener != null && mCurrentState == STATE_PLAYING) {
