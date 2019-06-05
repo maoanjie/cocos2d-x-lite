@@ -71,6 +71,10 @@ public class Cocos2dxEditBox {
     private int mEditTextID = 1;
     private int mButtonLayoutID = 2;
 
+    private RelativeLayout mLayout = null;
+    private RelativeLayout mEditboxLayout = null;
+
+
     /***************************************************************************************
      Inner class.
      **************************************************************************************/
@@ -250,6 +254,7 @@ public class Cocos2dxEditBox {
     public Cocos2dxEditBox(Cocos2dxActivity context, RelativeLayout layout) {
         Cocos2dxEditBox.sThis = this;
         mActivity = context;
+        mLayout = layout;
         this.addItems(context, layout);
     }
 
@@ -275,6 +280,7 @@ public class Cocos2dxEditBox {
         layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
         layout.addView(myLayout, layoutParams);
 
+        mEditboxLayout = myLayout;
         //FXI ME: Is it needed?
         // When touch area outside EditText and soft keyboard, then hide.
 //        layout.setOnTouchListener(new View.OnTouchListener() {
@@ -356,6 +362,9 @@ public class Cocos2dxEditBox {
     }
 
     private void show(String defaultValue, int maxLength, boolean isMultiline, boolean confirmHold, String confirmType, String inputType) {
+        mLayout.removeView(mEditboxLayout);
+        mLayout.addView(mEditboxLayout);
+
         mConfirmHold = confirmHold;
         mEditText.show(defaultValue, maxLength, isMultiline, confirmHold, confirmType, inputType);
         int editPaddingBottom = mEditText.getPaddingBottom();
