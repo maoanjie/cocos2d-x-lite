@@ -238,8 +238,10 @@ public class Cocos2dxVideoHelper {
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT);
         mLayout.addView(videoView, lParams);
-//        videoView.setZOrderOnTop(false);
+//        videoView.setZOrderOnTop(true);
         videoView.setOnCompletionListener(videoEventListener);
+
+        // 移动编辑框
     }
 
     public static void removeVideoWidget(int index){
@@ -564,7 +566,27 @@ public class Cocos2dxVideoHelper {
         if (view != null) {
             mLayout.removeView(view);
             view.setZOrderOnTop(bTop);
+//            view.setZOrderMediaOverlay(true);
             mLayout.addView(view);
+
+            // 改变主游戏的zorder
+            if (!bTop) {
+                for (int i = 0; i < mLayout.getChildCount(); i++) {
+                    View viewChild = mLayout.getChildAt(i);
+                    String strClassName = viewChild.getClass().getName();
+                    if ( viewChild.getClass().getName().equals("org.cocos2dx.lib.Cocos2dxGLSurfaceView") ) {
+                        ((Cocos2dxGLSurfaceView)viewChild).setZOrderOnTop(true);
+                        ((Cocos2dxGLSurfaceView)viewChild).setZOrderMediaOverlay(true);
+                        mLayout.bringChildToFront(viewChild);
+                        if (android.os.Build.VERSION.SDK_INT>=26) {
+                            viewChild.setVisibility(View.INVISIBLE);
+                            viewChild.setVisibility(View.VISIBLE);
+                        }
+                    }
+                }
+
+            }
+
         }
     }
     // added end

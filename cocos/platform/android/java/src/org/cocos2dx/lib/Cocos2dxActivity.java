@@ -331,6 +331,10 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
             mWebViewHelper = new Cocos2dxWebViewHelper(mFrameLayout);
         }
 
+//        // Should create EditBox after adding SurfaceView, or EditBox will be hidden by SurfaceView.
+//        mEditBox = new Cocos2dxEditBox(this, mFrameLayout);
+
+
         Window window = this.getWindow();
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
@@ -437,7 +441,6 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
         this.mGLSurfaceView.setCocos2dxRenderer(renderer);
 
 //        this.mGLSurfaceView.setZOrderOnTop(true);
-
         mFrameLayout.addView(this.mGLSurfaceView);
 
         return renderer;

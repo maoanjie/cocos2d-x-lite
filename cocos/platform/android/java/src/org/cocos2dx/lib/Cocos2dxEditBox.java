@@ -280,6 +280,8 @@ public class Cocos2dxEditBox {
         layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
         layout.addView(myLayout, layoutParams);
 
+        layout.bringChildToFront(myLayout);
+
         mEditboxLayout = myLayout;
         //FXI ME: Is it needed?
         // When touch area outside EditText and soft keyboard, then hide.
