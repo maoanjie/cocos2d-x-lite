@@ -95,6 +95,16 @@ str
 },
 
 /**
+ * @method getDeviceID
+ * @return {String}
+ */
+getDeviceID : function (
+)
+{
+    return ;
+},
+
+/**
  * @method vibrate
  */
 vibrate : function (
@@ -113,10 +123,10 @@ str
 },
 
 /**
- * @method getDeviceID
+ * @method getPasteboard
  * @return {String}
  */
-getDeviceID : function (
+getPasteboard : function (
 )
 {
     return ;
