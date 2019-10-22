@@ -137,10 +137,7 @@ public class Cocos2dxVideoHelper {
                 helper._pauseVideo(msg.arg1);
                 break;
             }
-            case VideoTaskResume: {
-                helper._resumeVideo(msg.arg1);
-                break;
-            }
+
             case VideoTaskStop: {
                 helper._stopVideo(msg.arg1);
                 break;
@@ -155,10 +152,6 @@ public class Cocos2dxVideoHelper {
                 } else {
                     helper._setVideoVisible(msg.arg1, false);
                 }
-                break;
-            }
-            case VideoTaskRestart: {
-                helper._restartVideo(msg.arg1);
                 break;
             }
             case VideoTaskKeepRatio: {

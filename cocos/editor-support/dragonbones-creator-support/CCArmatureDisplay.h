@@ -32,6 +32,11 @@
 #include "dragonbones-creator-support/CCSlot.h"
 #include "IOTypedArray.h"
 #include "MiddlewareManager.h"
+#include "renderer/scene/NodeProxy.hpp"
+#include "base/CCMap.h"
+#include "middleware-adapter.h"
+#include "renderer/scene/assembler/CustomAssembler.hpp"
+#include "renderer/Types.h"
 
 DRAGONBONES_NAMESPACE_BEGIN
 /**
@@ -75,6 +80,10 @@ public:
     /**
      * @inheritDoc
      */
+    virtual void dbRender() override;
+    /**
+     * @inheritDoc
+     */
     virtual void dispose(bool disposeProxy = true) override;
     /**
      * @inheritDoc
@@ -92,6 +101,13 @@ public:
      * @inheritDoc
      */
     virtual void removeDBEventListener(const std::string& type, const std::function<void(EventObject*)>& listener) override;
+
+	typedef std::function<void(EventObject*)> dbEventCallback;
+	void setDBEventCallback(dbEventCallback callback)
+	{
+		_dbEventCallback = callback;
+	}
+
     /**
      * @inheritDoc
      */
@@ -120,17 +136,19 @@ public:
         return nullptr;
     }
     
-    /**
-     * @return render info offset,it's a Uint32Array,
-     * format |render info offset|
-     */
-    se_object_ptr getRenderInfoOffset() const
+    void bindNodeProxy(cocos2d::renderer::NodeProxy* node)
     {
-        if (_renderInfoOffset)
-        {
-            return _renderInfoOffset->getTypeArray();
-        }
-        return nullptr;
+        CC_SAFE_RELEASE(_nodeProxy);
+        _nodeProxy = node;
+        CC_SAFE_RETAIN(_nodeProxy);
+    }
+    
+    void setEffect(cocos2d::renderer::Effect* effect)
+    {
+        if (effect == _effect) return;
+        CC_SAFE_RELEASE(_effect);
+        _effect = effect;
+        CC_SAFE_RETAIN(_effect);
     }
     
     void setColor(cocos2d::Color4B& color)
@@ -146,15 +164,14 @@ public:
         _debugDraw = enabled;
     }
     
+    void setBatchEnabled (bool enabled)
+    {
+        _batch = enabled;
+    }
+    
     void setOpacityModifyRGB (bool value)
     {
         _premultipliedAlpha = value;
-    }
-    
-    typedef std::function<void(EventObject*)> dbEventCallback;
-    void setDBEventCallback(dbEventCallback callback)
-    {
-        _dbEventCallback = callback;
     }
     
     /**
@@ -168,28 +185,29 @@ public:
      * @return root display,if this diplay is root,then return itself.
      */
     CCArmatureDisplay* getRootDisplay();
-    
 private:
     std::map<std::string,bool> _listenerIDMap;
-    cocos2d::middleware::IOTypedArray* _renderInfoOffset = nullptr;
     cocos2d::middleware::IOTypedArray* _debugBuffer = nullptr;
     cocos2d::Color4F _nodeColor = cocos2d::Color4F::WHITE;
     
     int _preBlendMode = -1;
-    int _preTextureIndex = -1;
-    int _curTextureIndex = -1;
-    int _curBlendSrc = -1;
-    int _curBlendDst = -1;
+    GLuint _preTextureIndex = -1;
+    GLuint _curTextureIndex = -1;
+    cocos2d::renderer::BlendFactor _curBlendSrc;
+    cocos2d::renderer::BlendFactor _curBlendDst;
     
     int _preISegWritePos = -1;
     int _curISegLen = 0;
     
     int _debugSlotsLen = 0;
     int _materialLen = 0;
-    std::size_t _materialLenOffset = -1;
     
+    bool _batch = false;
     bool _premultipliedAlpha = false;
     dbEventCallback _dbEventCallback = nullptr;
+    cocos2d::renderer::NodeProxy* _nodeProxy = nullptr;
+    cocos2d::renderer::Effect* _effect = nullptr;
+    cocos2d::renderer::CustomAssembler* _assembler = nullptr;
 };
 
 DRAGONBONES_NAMESPACE_END

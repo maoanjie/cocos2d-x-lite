@@ -63,7 +63,8 @@ function downloadSimulatorDLL(callback) {
     Download('http://192.168.52.109/TestBuilds/Fireball/simulator/dlls/dll.zip', destPath, {
         mode: '755',
         extract: true,
-        strip: 0
+        strip: 0,
+        agent: null,
     }).then(function(res) {
         callback();
     }).catch(callback);
@@ -149,7 +150,7 @@ gulp.task('gen-simulator', function(cb) {
     if (process.platform === 'darwin') {
         args = ['gen-simulator', '-m', 'debug', '-p', 'mac'];
     } else {
-        args = ['gen-simulator', '-m', 'debug', '-p', 'win32', '--vs', '2015', '--ol', 'en'];
+        args = ['gen-simulator', '-c', '-m', 'debug', '-p', 'win32', '--vs', '2017', '--ol', 'en'];
     }
     try {
         var child = spawn(cocosConsoleBin, args);
