@@ -1412,6 +1412,9 @@
 		BA21055F21009A5A00E19975 /* CCEventAssetsManagerEx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BA21054921008AC300E19975 /* CCEventAssetsManagerEx.cpp */; };
 		BAEA45551E279D5C00FA219F /* tinydir.h in Headers */ = {isa = PBXBuildFile; fileRef = BAEA45541E279D5C00FA219F /* tinydir.h */; };
 		BAEA45561E279D5C00FA219F /* tinydir.h in Headers */ = {isa = PBXBuildFile; fileRef = BAEA45541E279D5C00FA219F /* tinydir.h */; };
+		D4551B6D23602D65001CC86E /* TXLiteAVSDK_Smart.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4551B6C23602D65001CC86E /* TXLiteAVSDK_Smart.framework */; };
+		D4551B71236031CD001CC86E /* TXVideoPlayer-ios.h in Headers */ = {isa = PBXBuildFile; fileRef = D4551B6F236031CD001CC86E /* TXVideoPlayer-ios.h */; };
+		D4551B72236031CD001CC86E /* TXVideoPlayer-ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = D4551B70236031CD001CC86E /* TXVideoPlayer-ios.mm */; };
 		ED30577D1BEC76C90083C3ED /* crypt.h in Headers */ = {isa = PBXBuildFile; fileRef = ED3057761BEC76C90083C3ED /* crypt.h */; };
 		ED30577E1BEC76C90083C3ED /* ioapi_mem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED3057771BEC76C90083C3ED /* ioapi_mem.cpp */; };
 		ED30577F1BEC76C90083C3ED /* ioapi_mem.h in Headers */ = {isa = PBXBuildFile; fileRef = ED3057781BEC76C90083C3ED /* ioapi_mem.h */; };
@@ -2207,6 +2210,10 @@
 		BAEA45521E279D5C00FA219F /* COPYING */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = COPYING; sourceTree = "<group>"; };
 		BAEA45531E279D5C00FA219F /* package.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = package.json; sourceTree = "<group>"; };
 		BAEA45541E279D5C00FA219F /* tinydir.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tinydir.h; sourceTree = "<group>"; };
+		D4551B6C23602D65001CC86E /* TXLiteAVSDK_Smart.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = TXLiteAVSDK_Smart.framework; path = "../../build/jsb-link/frameworks/runtime-src/ios-common/SDK/TXPlayer/TXLiteAVSDK_Smart.framework"; sourceTree = "<group>"; };
+		D4551B6F236031CD001CC86E /* TXVideoPlayer-ios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "TXVideoPlayer-ios.h"; sourceTree = "<group>"; };
+		D4551B70236031CD001CC86E /* TXVideoPlayer-ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "TXVideoPlayer-ios.mm"; sourceTree = "<group>"; };
+		D4551B7323603577001CC86E /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		ED3057761BEC76C90083C3ED /* crypt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = crypt.h; path = ../external/sources/unzip/crypt.h; sourceTree = "<group>"; };
 		ED3057771BEC76C90083C3ED /* ioapi_mem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ioapi_mem.cpp; path = ../external/sources/unzip/ioapi_mem.cpp; sourceTree = "<group>"; };
 		ED3057781BEC76C90083C3ED /* ioapi_mem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ioapi_mem.h; path = ../external/sources/unzip/ioapi_mem.h; sourceTree = "<group>"; };
@@ -2267,6 +2274,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D4551B6D23602D65001CC86E /* TXLiteAVSDK_Smart.framework in Frameworks */,
 				468A968722F440AC005034BE /* libuv_a.a in Frameworks */,
 				468A968522F43F8F005034BE /* libv8_monolith.a in Frameworks */,
 				EDE5DFF81C0D6B3F0014147A /* libwebsockets.a in Frameworks */,
@@ -2746,6 +2754,8 @@
 		1551A341158F2AB200E66CFE /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D4551B7323603577001CC86E /* WebKit.framework */,
+				D4551B6C23602D65001CC86E /* TXLiteAVSDK_Smart.framework */,
 				468A968622F440AC005034BE /* libuv_a.a */,
 				468A967D22F43F00005034BE /* libv8_monolith.a */,
 				468A968422F43F8F005034BE /* libv8_monolith.a */,
@@ -3029,6 +3039,8 @@
 		40FF7A9C216B29CB00E73029 /* videoplayer */ = {
 			isa = PBXGroup;
 			children = (
+				D4551B6F236031CD001CC86E /* TXVideoPlayer-ios.h */,
+				D4551B70236031CD001CC86E /* TXVideoPlayer-ios.mm */,
 				40FF7A9E216B29CB00E73029 /* VideoPlayer-ios.mm */,
 				40FF7A9F216B29CB00E73029 /* VideoPlayer.h */,
 			);
@@ -4295,6 +4307,7 @@
 				469303A92046AE05004A3D6C /* SeApi.h in Headers */,
 				46FDDAAE202ACC6A00931238 /* Macro.h in Headers */,
 				04ED68DB21F8188F006E82F8 /* MeshBuffer.h in Headers */,
+				D4551B71236031CD001CC86E /* TXVideoPlayer-ios.h in Headers */,
 				469303872046AE05004A3D6C /* Object.hpp in Headers */,
 				1A28FF5E1F20AFAB007A1D9D /* SRProxyConnect.h in Headers */,
 				04DBD42822AE2DBD00DBE4CD /* VertexEffect.h in Headers */,
@@ -5072,6 +5085,7 @@
 				1A29D785205666B200168D9A /* LocalStorage.cpp in Sources */,
 				04DBD3CC22AE2DBD00DBE4CD /* Atlas.cpp in Sources */,
 				46AE3FEA2092F3A600F3A228 /* inspector_socket_server.cc in Sources */,
+				D4551B72236031CD001CC86E /* TXVideoPlayer-ios.mm in Sources */,
 				46FDDA8A202ACC6A00931238 /* Effect.cpp in Sources */,
 				046E06382185B41100B24E2D /* AnimationState.cpp in Sources */,
 				04DBD3CE22AE2DBD00DBE4CD /* Bone.cpp in Sources */,
@@ -5307,6 +5321,7 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				ENABLE_BITCODE = NO;
 				EXECUTABLE_PREFIX = "";
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../build/jsb-link/frameworks/runtime-src/ios-common/SDK/TXPlayer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "../cocos/platform/ios/cocos2d-prefix.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
@@ -5335,6 +5350,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_BITCODE = NO;
 				EXECUTABLE_PREFIX = "";
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../../build/jsb-link/frameworks/runtime-src/ios-common/SDK/TXPlayer";
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "../cocos/platform/ios/cocos2d-prefix.pch";
