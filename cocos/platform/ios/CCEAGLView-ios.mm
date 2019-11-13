@@ -185,6 +185,10 @@ namespace
 
 - (void) layoutSubviews
 {
+    UIApplicationState state = [[UIApplication sharedApplication] applicationState];
+    if (state == UIApplicationStateBackground)
+        return;
+    
     glBindFramebuffer(GL_FRAMEBUFFER, _defaultFramebuffer);
     if (_defaultColorBuffer)
     {
