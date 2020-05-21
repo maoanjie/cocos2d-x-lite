@@ -844,27 +844,6 @@ static bool js_engine_FileUtils_createDirectory(se::State& s)
 }
 SE_BIND_FUNC(js_engine_FileUtils_createDirectory)
 
-static bool js_engine_FileUtils_listFilesRecursively(se::State& s)
-{
-    cocos2d::FileUtils* cobj = (cocos2d::FileUtils*)s.nativeThisObject();
-    SE_PRECONDITION2(cobj, false, "js_engine_FileUtils_listFilesRecursively : Invalid Native Object");
-    const auto& args = s.args();
-    size_t argc = args.size();
-    CC_UNUSED bool ok = true;
-    if (argc == 2) {
-        std::string arg0;
-        std::vector<std::string>* arg1 = nullptr;
-        ok &= seval_to_std_string(args[0], &arg0);
-        ok &= seval_to_native_ptr(args[1], &arg1);
-        SE_PRECONDITION2(ok, false, "js_engine_FileUtils_listFilesRecursively : Error processing arguments");
-        cobj->listFilesRecursively(arg0, arg1);
-        return true;
-    }
-    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 2);
-    return false;
-}
-SE_BIND_FUNC(js_engine_FileUtils_listFilesRecursively)
-
 static bool js_engine_FileUtils_getWritablePath(se::State& s)
 {
     cocos2d::FileUtils* cobj = (cocos2d::FileUtils*)s.nativeThisObject();
@@ -975,7 +954,6 @@ bool js_register_engine_FileUtils(se::Object* obj)
     cls->defineFunction("setDefaultResourceRootPath", _SE(js_engine_FileUtils_setDefaultResourceRootPath));
     cls->defineFunction("getSearchResolutionsOrder", _SE(js_engine_FileUtils_getSearchResolutionsOrder));
     cls->defineFunction("createDirectory", _SE(js_engine_FileUtils_createDirectory));
-    cls->defineFunction("listFilesRecursively", _SE(js_engine_FileUtils_listFilesRecursively));
     cls->defineFunction("getWritablePath", _SE(js_engine_FileUtils_getWritablePath));
     cls->defineStaticFunction("setDelegate", _SE(js_engine_FileUtils_setDelegate));
     cls->defineStaticFunction("getInstance", _SE(js_engine_FileUtils_getInstance));
@@ -993,21 +971,21 @@ bool js_register_engine_FileUtils(se::Object* obj)
 se::Object* __jsb_cocos2d_Device_proto = nullptr;
 se::Class* __jsb_cocos2d_Device_class = nullptr;
 
-static bool js_engine_Device_getNetworkType(se::State& s)
+static bool js_engine_Device_getDevicePixelRatio(se::State& s)
 {
     const auto& args = s.args();
     size_t argc = args.size();
     CC_UNUSED bool ok = true;
     if (argc == 0) {
-        int result = (int)cocos2d::Device::getNetworkType();
+        int result = cocos2d::Device::getDevicePixelRatio();
         ok &= int32_to_seval(result, &s.rval());
-        SE_PRECONDITION2(ok, false, "js_engine_Device_getNetworkType : Error processing arguments");
+        SE_PRECONDITION2(ok, false, "js_engine_Device_getDevicePixelRatio : Error processing arguments");
         return true;
     }
     SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
     return false;
 }
-SE_BIND_FUNC(js_engine_Device_getNetworkType)
+SE_BIND_FUNC(js_engine_Device_getDevicePixelRatio)
 
 static bool js_engine_Device_setAccelerometerEnabled(se::State& s)
 {
@@ -1076,6 +1054,22 @@ static bool js_engine_Device_setKeepScreenOn(se::State& s)
     return false;
 }
 SE_BIND_FUNC(js_engine_Device_setKeepScreenOn)
+
+static bool js_engine_Device_getNetworkType(se::State& s)
+{
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 0) {
+        int result = (int)cocos2d::Device::getNetworkType();
+        ok &= int32_to_seval(result, &s.rval());
+        SE_PRECONDITION2(ok, false, "js_engine_Device_getNetworkType : Error processing arguments");
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
+    return false;
+}
+SE_BIND_FUNC(js_engine_Device_getNetworkType)
 
 static bool js_engine_Device_getBatteryLevel(se::State& s)
 {
@@ -1164,11 +1158,12 @@ bool js_register_engine_Device(se::Object* obj)
 {
     auto cls = se::Class::create("Device", obj, nullptr, nullptr);
 
-    cls->defineStaticFunction("getNetworkType", _SE(js_engine_Device_getNetworkType));
+    cls->defineStaticFunction("getDevicePixelRatio", _SE(js_engine_Device_getDevicePixelRatio));
     cls->defineStaticFunction("setAccelerometerEnabled", _SE(js_engine_Device_setAccelerometerEnabled));
     cls->defineStaticFunction("setAccelerometerInterval", _SE(js_engine_Device_setAccelerometerInterval));
     cls->defineStaticFunction("vibrate", _SE(js_engine_Device_vibrate));
     cls->defineStaticFunction("setKeepScreenOn", _SE(js_engine_Device_setKeepScreenOn));
+    cls->defineStaticFunction("getNetworkType", _SE(js_engine_Device_getNetworkType));
     cls->defineStaticFunction("getBatteryLevel", _SE(js_engine_Device_getBatteryLevel));
     cls->defineStaticFunction("getDeviceRotation", _SE(js_engine_Device_getDeviceRotation));
     cls->defineStaticFunction("getDPI", _SE(js_engine_Device_getDPI));

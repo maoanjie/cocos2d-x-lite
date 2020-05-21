@@ -46,7 +46,7 @@ CustomAssembler::~CustomAssembler()
 
 void CustomAssembler::handle(NodeProxy *node, ModelBatcher* batcher, Scene* scene)
 {
-    batcher->commitIA(node, this);
+    batcher->commitIA(node, this, node->getCullingMask());
 }
 
 void CustomAssembler::reset()
@@ -114,7 +114,7 @@ InputAssembler* CustomAssembler::getIA(std::size_t index) const
     return _iaPool[index];
 }
 
-void CustomAssembler::updateEffect(std::size_t index, Effect* effect)
+void CustomAssembler::updateEffect(std::size_t index, EffectVariant* effect)
 {
     auto size = _effects.size();
     if (index == size)

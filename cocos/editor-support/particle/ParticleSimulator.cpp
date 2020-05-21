@@ -37,13 +37,15 @@ NS_CC_BEGIN
 
 // global particle pool
 static ParticlePool _pool;
+// particleSystem max step delta time
+static const float _maxParticleDeltaTime = 0.0333f;  
 
 void Particle::reset()
 {
     pos = cocos2d::Vec3::ZERO;
     startPos = cocos2d::Vec3::ZERO;
     color = cocos2d::Color4B::BLACK;
-    deltaColor = cocos2d::Color4B::BLACK;
+    deltaColor = cocos2d::Color4F::BLACK;
     size = 0;
     deltaSize = 0;
     rotation = 0;
@@ -99,6 +101,7 @@ ParticleSimulator::~ParticleSimulator()
 void ParticleSimulator::stop()
 {
     _active = false;
+    _readyToPlay = false;
     _elapsed = duration;
     _emitCounter = 0;
 }
@@ -106,6 +109,7 @@ void ParticleSimulator::stop()
 void ParticleSimulator::reset()
 {
     _active = true;
+    _readyToPlay = true;
     _elapsed = 0;
     _emitCounter = 0;
     _finished = false;
@@ -213,6 +217,7 @@ void ParticleSimulator::onDisable()
 
 void ParticleSimulator::render(float dt)
 {
+    dt = dt > _maxParticleDeltaTime ? _maxParticleDeltaTime : dt;
     if (_finished || _nodeProxy == nullptr || _effect == nullptr)
     {
         return;
@@ -346,10 +351,12 @@ void ParticleSimulator::render(float dt)
             }
             
             // color
-            particle.color.r += particle.deltaColor.r * dt;
-            particle.color.g += particle.deltaColor.g * dt;
-            particle.color.b += particle.deltaColor.b * dt;
-            particle.color.a += particle.deltaColor.a * dt;
+            auto& color = particle.color;
+            auto& deltaColor = particle.deltaColor;
+            color.r = clampf(color.r + deltaColor.r * dt, 0, 255);
+            color.g = clampf(color.g + deltaColor.g * dt, 0, 255);
+            color.b = clampf(color.b + deltaColor.b * dt, 0, 255);
+            color.a = clampf(color.a + deltaColor.a * dt, 0, 255);
             
             // size
             particle.size += particle.deltaSize * dt;
@@ -381,9 +388,21 @@ void ParticleSimulator::render(float dt)
             }
             
             auto x = newPos.x, y = newPos.y;
-            auto size_2 = particle.size * 0.5;
-            auto x1 = -size_2, y1 = -size_2;
-            auto x2 = size_2, y2 = size_2;
+            auto width = particle.size;
+            auto height = width;
+            if (aspectRatio > 1.0f)
+            {
+                height = width / aspectRatio;
+            }
+            else
+            {
+                width = height * aspectRatio;
+            }
+            
+            auto halfW = width * 0.5;
+            auto halfH = height * 0.5;
+            auto x1 = -halfW, y1 = -halfH;
+            auto x2 = halfW, y2 = halfH;
             
             auto rad = -CC_DEGREES_TO_RADIANS(particle.rotation);
             auto cr = cos(rad), sr = sin(rad);
@@ -449,7 +468,7 @@ void ParticleSimulator::render(float dt)
     assembler->updateIABuffer(0, mb->getGLVB(), mb->getGLIB());
     assembler->updateIARange(0, indexStart, indexCount);
     
-    if (_particles.size() == 0 && !_active)
+    if (_particles.size() == 0 && !_active  && !_readyToPlay)
     {
         _finished = true;
         if (_finishedCallback)
@@ -457,6 +476,12 @@ void ParticleSimulator::render(float dt)
             _finishedCallback();
         }
     }
+}
+
+uint32_t ParticleSimulator::getRenderOrder() const
+{
+    if (!_nodeProxy) return 0;
+    return _nodeProxy->getRenderOrder();
 }
 
 NS_CC_END

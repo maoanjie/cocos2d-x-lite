@@ -40,7 +40,6 @@ ModelBatcher::ModelBatcher(RenderFlow* flow)
 , _currEffect(nullptr)
 , _buffer(nullptr)
 , _useModel(false)
-, _customProps(nullptr)
 , _node(nullptr)
 {
     for (int i = 0; i < INIT_MODEL_LENGTH; i++)
@@ -114,25 +113,17 @@ void ModelBatcher::changeCommitState(CommitState state)
             break;
     }
     setCurrentEffect(nullptr);
-    setCustomProperties(nullptr);
     _commitState = state;
 }
 
-void ModelBatcher::commit(NodeProxy* node, Assembler* assembler)
+void ModelBatcher::commit(NodeProxy* node, Assembler* assembler, int cullingMask)
 {
     changeCommitState(CommitState::Common);
-    
-    VertexFormat* vfmt = assembler->getVertexFormat();
-    if (!vfmt)
-    {
-        return;
-    }
     
     bool useModel = assembler->getUseModel();
     bool ignoreWorldMatrix = assembler->isIgnoreWorldMatrix();
     const Mat4& nodeWorldMat = node->getWorldMatrix();
     const Mat4& worldMat = useModel && !ignoreWorldMatrix ? nodeWorldMat : Mat4::IDENTITY;
-    int cullingMask = node->getCullingMask();
     
     auto asmDirty = assembler->isDirty(AssemblerBase::VERTICES_OPACITY_CHANGED);
     auto nodeDirty = node->isDirty(RenderFlow::NODE_OPACITY_CHANGED);
@@ -142,8 +133,7 @@ void ModelBatcher::commit(NodeProxy* node, Assembler* assembler)
     {
         assembler->beforeFillBuffers(i);
         
-        Effect* effect = assembler->getEffect(i);
-        CustomProperties* customProp = assembler->getCustomProperties();
+        EffectVariant* effect = assembler->getEffect(i);
         if (!effect) continue;
 
         if (_currEffect == nullptr ||
@@ -155,7 +145,6 @@ void ModelBatcher::commit(NodeProxy* node, Assembler* assembler)
             
             setNode(_useModel ? node : nullptr);
             setCurrentEffect(effect);
-            setCustomProperties(customProp);
             _modelMat.set(worldMat);
             _useModel = useModel;
             _cullingMask = cullingMask;
@@ -166,27 +155,21 @@ void ModelBatcher::commit(NodeProxy* node, Assembler* assembler)
             assembler->updateOpacity(i, node->getRealOpacity());
         }
         
-        MeshBuffer* buffer = _buffer;
-        if (!_buffer || vfmt != _buffer->_vertexFmt)
-        {
-            buffer = getBuffer(vfmt);
-        }
-        assembler->fillBuffers(node, buffer, i);
+        assembler->fillBuffers(node, this, i);
     }
 }
 
-void ModelBatcher::commitIA(NodeProxy* node, CustomAssembler* assembler)
+void ModelBatcher::commitIA(NodeProxy* node, CustomAssembler* assembler, int cullingMask)
 {
     changeCommitState(CommitState::Custom);
 
-    Effect* effect = assembler->getEffect(0);
+    EffectVariant* effect = assembler->getEffect(0);
     if (!effect) return;
 
     auto customIA = assembler->getIA(0);
     if (!customIA) return;
     
     std::size_t iaCount = assembler->getIACount();
-    int cullingMask = node->getCullingMask();
     bool useModel = assembler->getUseModel();
     const Mat4& worldMat = useModel ? node->getWorldMatrix() : Mat4::IDENTITY;
     
@@ -265,7 +248,7 @@ void ModelBatcher::flushIA()
     _modelOffset++;
     model->setWorldMatix(_modelMat);
     model->setCullingMask(_cullingMask);
-    model->setEffect(_currEffect, _customProps);
+    model->setEffect(_currEffect);
     model->setNode(_node);
     model->setInputAssembler(_ia);
     
@@ -316,7 +299,7 @@ void ModelBatcher::flush()
     _modelOffset++;
     model->setWorldMatix(_modelMat);
     model->setCullingMask(_cullingMask);
-    model->setEffect(_currEffect, _customProps);
+    model->setEffect(_currEffect);
     model->setNode(_node);
     model->setInputAssembler(_ia);
     
@@ -357,7 +340,7 @@ void ModelBatcher::setNode(NodeProxy* node)
     CC_SAFE_RETAIN(_node);
 }
 
-void ModelBatcher::setCurrentEffect(Effect* effect)
+void ModelBatcher::setCurrentEffect(EffectVariant* effect)
 {
     if (_currEffect == effect)
     {
@@ -370,6 +353,11 @@ void ModelBatcher::setCurrentEffect(Effect* effect)
 
 MeshBuffer* ModelBatcher::getBuffer(VertexFormat* fmt)
 {
+    if (_buffer != nullptr && fmt == _buffer->_vertexFmt)
+    {
+        return _buffer;
+    }
+    
     MeshBuffer* buffer = nullptr;
     auto iter = _buffers.find(fmt);
     if (iter == _buffers.end())
@@ -381,6 +369,7 @@ MeshBuffer* ModelBatcher::getBuffer(VertexFormat* fmt)
     {
         buffer = iter->second;
     }
+    
     return buffer;
 }
 

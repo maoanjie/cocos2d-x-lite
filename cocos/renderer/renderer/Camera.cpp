@@ -104,7 +104,8 @@ void Camera::calcMatrices(const int width, const int height)
     // view matrix
     //REFINE:
     _node->getWorldRT(&_worldRTInv);
-    _matView.set(_worldRTInv.getInversed());
+    _matView.set(_worldRTInv);
+    _matView.inverse();
 
     // projecton matrix
     float aspect = (float)width / height;
@@ -143,6 +144,7 @@ void Camera::extractView(View& out, int width, int height)
 
     calcMatrices(width, height);
     out.matView.set(_matView);
+    out.matViewInv.set(_worldRTInv);
     out.matProj.set(_matProj);
     out.matViewProj.set(_matViewProj);
     out.matInvViewProj.set(_matInvViewProj);

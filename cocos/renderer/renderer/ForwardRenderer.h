@@ -69,7 +69,6 @@ private:
     void submitLightsUniforms();
     void submitShadowStageUniforms(const View& view);
     void submitOtherStagesUniforms();
-    void updateShaderDefines(StageItem& item);
     void sortItems(std::vector<StageItem>& items);
     void drawItems(const std::vector<StageItem>& items);
     void opaqueStage(const View& view, std::vector<StageItem>& items);
@@ -78,16 +77,10 @@ private:
     void resetData();
     static bool compareItems(const StageItem& a, const StageItem& b);
     
-    Vector<Light*> _directionalLights;
-    Vector<Light*> _pointLights;
-    Vector<Light*> _spotLights;
+    Vector<Light*> _lights;
     Vector<Light*> _shadowLights;
-    Vector<Light*> _ambientLights;
     
     RecyclePool<float>* _arrayPool = nullptr;
-    
-    int _width = 0;
-    int _height = 0;
     std::size_t _numLights = 0;
 };
 

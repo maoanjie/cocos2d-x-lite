@@ -23,12 +23,13 @@
  ****************************************************************************/
 
 #include "MeshAssembler.hpp"
+#include "../ModelBatcher.hpp"
 
 RENDERER_BEGIN
 
 MeshAssembler::MeshAssembler()
 {
-    
+    _useModel = true;
 }
 
 MeshAssembler::~MeshAssembler()
@@ -40,12 +41,14 @@ void MeshAssembler::handle(NodeProxy *node, ModelBatcher *batcher, Scene *scene)
 {
     if (_renderNode != nullptr)
     {
-        Assembler::handle(_renderNode, batcher, scene);
+        batcher->commitIA(_renderNode, this, node->getCullingMask());
     }
     else
     {
-        Assembler::handle(node, batcher, scene);
+        batcher->commitIA(node, this, node->getCullingMask());
     }
+    
+    batcher->flushIA();
 }
 
 void MeshAssembler::setNode(NodeProxy* node)
@@ -64,6 +67,45 @@ void MeshAssembler::setNode(NodeProxy* node)
     {
         _renderNode->retain();
     }
+}
+
+void MeshAssembler::updateIAData(std::size_t index, VertexFormat* vfmt, se_object_ptr vertices, se_object_ptr indices)
+{
+    _datas.updateMesh(index, vertices, indices);
+    auto data = _datas.getRenderData(index);
+    
+    auto ia = adjustIA(index);
+    
+    auto ib = ia->getIndexBuffer();
+    if (!ib) {
+        ib = new IndexBuffer();
+        ib->autorelease();
+        ib->init(DeviceGraphics::getInstance(), IndexFormat::UINT16, Usage::STATIC, data->getIndices(), data->getIBytes(), (uint32_t)data->getIBytes() / sizeof(unsigned short));
+        ia->setIndexBuffer(ib);
+    }
+    else {
+        ib->update(0, data->getIndices(), data->getIBytes());
+    }
+    
+    auto vb = ia->getVertexBuffer();
+    if (!vb) {
+        vb = new VertexBuffer();
+        vb->autorelease();
+        vb->init(DeviceGraphics::getInstance(), vfmt, Usage::STATIC, data->getVertices(), data->getVBytes(), (uint32_t)data->getVBytes() / vfmt->getBytes());
+        ia->setVertexBuffer(vb);
+    }
+    else {
+        vb->update(0, data->getVertices(), data->getVBytes());
+    }
+    
+    ia->setCount(ib->getCount());
+}
+
+void MeshAssembler::reset()
+{
+    CustomAssembler::reset();
+    
+    _datas.clear();
 }
 
 RENDERER_END

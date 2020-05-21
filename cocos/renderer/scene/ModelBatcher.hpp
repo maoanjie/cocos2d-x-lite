@@ -75,13 +75,13 @@ public:
      *  @param[in] node The node which owns the render handle
      *  @param[in] handle The render handle contains render datas
      */
-    void commit(NodeProxy* node, Assembler* handle);
+    void commit(NodeProxy* node, Assembler* handle, int cullingMask);
     /**
      *  @brief Commit a custom render handle to the model batcher
      *  @param[in] node The node which owns the render handle
      *  @param[in] handle The custom render handle contains render datas
      */
-    void commitIA(NodeProxy* node, CustomAssembler* handle);
+    void commitIA(NodeProxy* node, CustomAssembler* handle, int cullingMask);
     
     /**
      *  @brief This method should be invoked before commit any render handles each frame.
@@ -127,9 +127,8 @@ public:
     
     void setNode(NodeProxy* node);
     void setCullingMask(int cullingMask) { _cullingMask = cullingMask; }
-    void setCurrentEffect(Effect* effect);
+    void setCurrentEffect(EffectVariant* effect);
     void setUseModel(bool useModel) { _useModel = useModel; }
-    void setCustomProperties(CustomProperties* props) { _customProps = props; };
 private:
     void changeCommitState(CommitState state);
 private:
@@ -143,9 +142,8 @@ private:
     NodeProxy* _node = nullptr;
     
     MeshBuffer* _buffer = nullptr;
-    Effect* _currEffect = nullptr;
+    EffectVariant* _currEffect = nullptr;
     RenderFlow* _flow = nullptr;
-    CustomProperties* _customProps = nullptr;
 
     StencilManager* _stencilMgr = nullptr;
     

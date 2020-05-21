@@ -39,8 +39,12 @@
 
 RENDERER_BEGIN
 
+uint32_t NodeProxy::_globalRenderOrder = 0;
+
 NodeProxy::NodeProxy(std::size_t unitID, std::size_t index, const std::string& id, const std::string& name)
 {
+    traverseHandle = render;
+    
     _id = id;
     _unitID = unitID;
     _index = index;
@@ -61,12 +65,13 @@ NodeProxy::NodeProxy(std::size_t unitID, std::size_t index, const std::string& i
     _localMat = unit->getLocalMat(index);
     _worldMat = unit->getWorldMat(index);
     _parentInfo = unit->getParent(index);
-    _parentInfo->unitID  = PARENT_INVALID;
+    _parentInfo->unitID = PARENT_INVALID;
     _parentInfo->index = PARENT_INVALID;
     _localZOrder = unit->getZOrder(index);
     _cullingMask = unit->getCullingMask(index);
     _opacity = unit->getOpacity(index);
     _is3DNode = unit->getIs3D(index);
+    _skew = unit->getSkew(index);
     
     uint64_t* self = unit->getNode(index);
     *self = (uint64_t)this;
@@ -98,6 +103,7 @@ void NodeProxy::destroyImmediately()
     _cullingMask = nullptr;
     _opacity = nullptr;
     _is3DNode = nullptr;
+    _skew = nullptr;
 }
 
 // lazy allocs
@@ -267,10 +273,13 @@ void NodeProxy::updateLevel()
 
 void NodeProxy::setLocalZOrder(int zOrder)
 {
-    *_localZOrder = zOrder;
-    if (_parent != nullptr)
+    if (*_localZOrder != zOrder)
     {
-        *_parent->_dirty |= RenderFlow::REORDER_CHILDREN;
+        *_localZOrder = zOrder;
+        if (_parent != nullptr)
+        {
+            *_parent->_dirty |= RenderFlow::REORDER_CHILDREN;
+        }
     }
 }
 
@@ -432,7 +441,9 @@ void NodeProxy::updateWorldMatrix()
     {
         if (selfWorldDirty || *_parent->_dirty & RenderFlow::WORLD_TRANSFORM_CHANGED)
         {
-            updateWorldMatrix(_parent->getWorldMatrix());
+            cocos2d::Mat4::multiply(_parent->getWorldMatrix(), *_localMat, _worldMat);
+            *_dirty &= ~RenderFlow::WORLD_TRANSFORM;
+            *_dirty |= RenderFlow::WORLD_TRANSFORM_CHANGED;
         }
     }
     else if (selfWorldDirty)
@@ -443,16 +454,17 @@ void NodeProxy::updateWorldMatrix()
     }
 }
 
-void NodeProxy::updateWorldMatrix(const cocos2d::Mat4& parentMatrix)
+void NodeProxy::updateWorldMatrix(const cocos2d::Mat4& worldMatrix)
 {
-    _worldMat->multiply(parentMatrix, *_localMat, _worldMat);
+    *_worldMat = worldMatrix;
     *_dirty &= ~RenderFlow::WORLD_TRANSFORM;
     *_dirty |= RenderFlow::WORLD_TRANSFORM_CHANGED;
 }
 
 void NodeProxy::updateLocalMatrix()
 {
-    if (*_dirty & RenderFlow::LOCAL_TRANSFORM)
+    bool skew = std::abs(_skew->x - 0.0f) > MATH_EPSILON || std::abs(_skew->y - 0.0f) > MATH_EPSILON;
+    if (*_dirty & RenderFlow::LOCAL_TRANSFORM || skew)
     {
         _localMat->setIdentity();
 
@@ -470,70 +482,90 @@ void NodeProxy::updateLocalMatrix()
             _localMat->rotate(q);
             _localMat->scale(_trs->sx, _trs->sy, 1);
         }
-
+        
+        if (skew)
+        {
+            auto& m = _localMat->m;
+            auto a = m[0];
+            auto b = m[1];
+            auto c = m[4];
+            auto d = m[5];
+            auto skx = (float)tanf(CC_DEGREES_TO_RADIANS(_skew->x));
+            auto sky = (float)tanf(CC_DEGREES_TO_RADIANS(_skew->y));
+            m[0] = a + c * sky;
+            m[1] = b + d * sky;
+            m[4] = c + a * skx;
+            m[5] = d + b * skx;
+        }
+        
         *_dirty &= ~RenderFlow::LOCAL_TRANSFORM;
         *_dirty |= RenderFlow::WORLD_TRANSFORM;
     }
 }
 
-void NodeProxy::render(ModelBatcher* batcher, Scene* scene)
+void NodeProxy::render(NodeProxy* node, ModelBatcher* batcher, Scene* scene)
 {
-    if (!_needVisit || _realOpacity == 0) return;
+    node->_renderOrder = _globalRenderOrder++;
+    
+    if (!node->_needVisit || node->_realOpacity == 0) return;
 
-    bool needRender = *_dirty & RenderFlow::RENDER;
-    if (_needRender != needRender)
+    bool needRender = *node->_dirty & RenderFlow::RENDER;
+    if (node->_needRender != needRender)
     {
-        if (_assembler) _assembler->enableDirty(AssemblerBase::VERTICES_OPACITY_CHANGED);
-        _needRender = needRender;
+        if (node->_assembler) node->_assembler->enableDirty(AssemblerBase::VERTICES_OPACITY_CHANGED);
+        node->_needRender = needRender;
     }
     
     // pre render
-    if (_assembler && needRender) _assembler->handle(this, batcher, scene);
+    if (node->_assembler && needRender) node->_assembler->handle(node, batcher, scene);
 
-    reorderChildren();
-    for (const auto& child : _children)
+    node->reorderChildren();
+    for (const auto& child : node->_children)
     {
-        child->render(batcher, scene);
+        auto traverseHandle = child->traverseHandle;
+        traverseHandle(child, batcher, scene);
     }
 
     // post render
-    bool needPostRender = *_dirty & RenderFlow::POST_RENDER;
-    if (_assembler && needPostRender) _assembler->postHandle(this, batcher, scene);
+    bool needPostRender = *(node->_dirty) & RenderFlow::POST_RENDER;
+    if (node->_assembler && needPostRender) node->_assembler->postHandle(node, batcher, scene);
 }
 
-void NodeProxy::visit(ModelBatcher* batcher, Scene* scene)
+void NodeProxy::visit(NodeProxy* node, ModelBatcher* batcher, Scene* scene)
 {
-    if (!_needVisit) return;
+    node->_renderOrder = _globalRenderOrder++;
+    
+    if (!node->_needVisit) return;
 
-    updateRealOpacity();
+    node->updateRealOpacity();
 
-    if (_realOpacity == 0)
+    if (node->_realOpacity == 0)
     {
         return;
     }
     
-    updateLocalMatrix();
-    updateWorldMatrix();
+    node->updateLocalMatrix();
+    node->updateWorldMatrix();
     
-    bool needRender = *_dirty & RenderFlow::RENDER;
-    if (_needRender != needRender)
+    bool needRender = *(node->_dirty) & RenderFlow::RENDER;
+    if (node->_needRender != needRender)
     {
-        if (_assembler) _assembler->enableDirty(AssemblerBase::VERTICES_OPACITY_CHANGED);
-        _needRender = needRender;
+        if (node->_assembler) node->_assembler->enableDirty(AssemblerBase::VERTICES_OPACITY_CHANGED);
+        node->_needRender = needRender;
     }
     
     // pre render
-    if (_assembler && needRender) _assembler->handle(this, batcher, scene);
+    if (node->_assembler && needRender) node->_assembler->handle(node, batcher, scene);
     
-    reorderChildren();
-    for (const auto& child : _children)
+    node->reorderChildren();
+    for (const auto& child : node->_children)
     {
-        child->visit(batcher, scene);
+        visit(child, batcher, scene);
     }
     
     // post render
-    bool needPostRender = *_dirty & RenderFlow::POST_RENDER;
-    if (_assembler && needPostRender) _assembler->postHandle(this, batcher, scene);
+    bool needPostRender = *(node->_dirty) & RenderFlow::POST_RENDER;
+    if (node->_assembler && needPostRender) node->_assembler->postHandle(node, batcher, scene);
 }
 
 RENDERER_END
