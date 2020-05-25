@@ -70,7 +70,7 @@ public class Cocos2dxEditBox {
     private int mEditTextID = 1;
     private int mButtonLayoutID = 2;
 
-    private RelativeLayout mLayout = null;
+    private FrameLayout mLayout = null;
     private RelativeLayout mEditboxLayout = null;
 
 
